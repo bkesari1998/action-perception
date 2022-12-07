@@ -13,7 +13,7 @@ Create a new virtual conda environment and install the required packages: <br />
 Activate the environment: <br />
 `conda activate dnns_project`
 
-Clone the ppdlgym repository (https://github.com/bkesari1998/pddlgym) to your local machine at the same directory level as this repository. <br />
+Clone the ppdlgym repository (https://github.com/bkesari1998/pddlgym) and the pddlgym_planners respository (https://github.com/bkesari1998/pddlgym_planners) to your local machine at the same directory level as this repository. <br />
 
 Install the pddlgym repository: <br />
 `cd pddlgym` <br />
