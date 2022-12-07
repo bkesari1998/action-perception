@@ -6,15 +6,17 @@ sys.path.append('/Users/bharatkesari/Documents/tufts/academic/cs_137/project/pdd
 sys.path.append('/Users/bharatkesari/Documents/tufts/academic/cs_137/project')
 
 import pddlgym
-import pddlgym_planners
+from pddlgym.structs import Literal
 from gym import error
+from pddlgym.core import InvalidAction
 
 class Environment(object):
     '''
     Wrapper for pddlgym environment.
     '''
 
-    def __init__(self, env_name: str) -> None:
+    def __init__(self, 
+                env_name: str):
         '''
         Initializes pddlgym environment
         '''
@@ -32,26 +34,21 @@ class Environment(object):
         
     def get_img(self):
         '''
-        Returns image file of environment at current timestep
+        Wrapper for render function for gym environment.
+        Returns image file of environment at current timestep.
         '''
         return self.env.render()
 
+    def step(self, act: Literal):
+        '''
+        Wrapper for gym step function.
+        '''
 
-if __name__ == '__main__':
-
-# See `pddl/sokoban.pddl` and `pddl/sokoban/problem3.pddl`.
-env = pddlgym.make("PDDLEnvSimple-v0", raise_error_on_invalid_action=True)
-print(env.action_space)
-env.fix_problem_index(0)
-obs, debug_info = env.reset()
-planner = FD()
-plan = planner(env.domain, obs)
-print("Plan:", plan)
-for act in plan:
-    print("Obs:", obs)
-    print("Act:", act)
-    action_str = str(act).split("(")[0]
-    action = env.action_space.sample(obs)
-    print (action)
-    obs, reward, done, info = env.step(action_str)
-print("Final obs, reward, done:", obs, reward, done)
+        # Try executing the actions 
+        try:
+            self.env.step(act)
+        except InvalidAction as e:
+            return False
+        
+        return True
+    
