@@ -1,0 +1,8 @@
+name: dnns_project
+channels:
+  - pypi
+dependencies:
+  - python=3.8.15
+  - pysat=3.0.5
+  - pyperplan=2.1
+  
