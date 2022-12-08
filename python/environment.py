@@ -1,14 +1,12 @@
 import sys
 
 # Path to pddlgym
-sys.path.append('/Users/bharatkesari/Documents/tufts/academic/cs_137/project/pddlgym')
-# Path to pddlgym planners
-sys.path.append('/Users/bharatkesari/Documents/tufts/academic/cs_137/project')
+sys.path.append('../../pddlgym')
 
 import pddlgym
-from pddlgym.structs import Literal
 from gym import error
 from pddlgym.core import InvalidAction
+import imageio
 
 class Environment(object):
     '''
@@ -16,9 +14,14 @@ class Environment(object):
     '''
 
     def __init__(self, 
-                env_name: str):
+                env_name,
+                problem_index=0):
         '''
-        Initializes pddlgym environment
+        Initializes pddlgym environment.
+
+        env_name: pddlgym style environment name string.
+        problem_index: pddl problem file index
+        returns: nothing.
         '''
         self.env = None
 
@@ -26,29 +29,67 @@ class Environment(object):
             try:
                 # Create environmet
                 self.env = pddlgym.make(env_name, raise_error_on_invalid_action=True)
+
+                # Fix problem index
+                problem_index_fixed = False
+                while not problem_index_fixed:
+                    try:
+                        self.env.fix_problem_index(problem_index)
+                    except: # add exception
+                        # Ask user to input existing problem index
+                        problem_index = input("Please input existing problem index")
+
             except error.NameNotFound as e:
                 print(e)
                 # Ask user to input correct environment name
                 env_name = input("Please input correct environment name: ")
+
+        # Variable to track timesteps
+        self.timestep = 0
         
         
-    def get_img(self):
+    def render(self):
         '''
         Wrapper for render function for gym environment.
-        Returns image file of environment at current timestep.
+        returns: image array of environment at current timestep.
         '''
         return self.env.render()
 
-    def step(self, act: Literal):
+    def save_render(self, 
+                    img, 
+                    prefix="results/"):
+        '''
+        Wrapper to save rendered image of environment for current timestep.
+        img: image array of render.
+        prefex: directory to save render image file
+        '''
+
+        imageio.imsave(f'{prefix}{str(self.timestep).zfill(3)}.png', img)
+
+    def step(self, 
+            action):
         '''
         Wrapper for gym step function.
         '''
 
         # Try executing the actions 
         try:
-            self.env.step(act)
+            self.env.step(action)
+            self.timestep += 1
+
+        # Action fails
         except InvalidAction as e:
-            return False
-        
-        return True
-    
+            print(e)
+            img = self.render()
+            self.save_render(img)
+
+    def reset(self):
+        '''
+        Wrapper for gym reset function. Fixes problem index for pddl problem file.
+        '''
+
+        # Set timesteps to 0
+        self.timestep = 0
+
+        # Reset environment
+        self.env.reset()
