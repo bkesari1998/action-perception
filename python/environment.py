@@ -14,7 +14,7 @@ class Environment(object):
     '''
 
     def __init__(self, 
-                env_name,
+                env_name="PDDLEnvSimple-v0",
                 problem_index=0):
         '''
         Initializes pddlgym environment.
@@ -35,6 +35,7 @@ class Environment(object):
                 while not problem_index_fixed:
                     try:
                         self.env.fix_problem_index(problem_index)
+                        problem_index_fixed = True
                     except: # add exception
                         # Ask user to input existing problem index
                         problem_index = input("Please input existing problem index")
@@ -45,7 +46,8 @@ class Environment(object):
                 env_name = input("Please input correct environment name: ")
 
         # Variable to track timesteps
-        self.timestep = 0
+        self.timestep = None 
+        self.reset()
         
         
     def render(self):
