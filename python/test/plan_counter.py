@@ -1,11 +1,12 @@
 import subprocess
 from pyperplan.search.sat import get_plan_formula
 from pyperplan.planner import _parse, _ground
-from python.cnfwriter import CnfWriter
+from cnfwriter import CnfWriter
 from pysat.solvers import Glucose3
 from io import StringIO
 from pysat.formula import CNF
 import sys
+import os
 import logging
 
 def format_cnfstr_to_dimacs(cnf_str: str):
@@ -43,9 +44,8 @@ def print_positions(model):
 
 
 if __name__ == "__main__":
-
-    domain_file = "/home/mulip-stargazer/percept_sat/pddlgym/pddlgym/pddl/maze.pddl"
-    problem_file = "/home/mulip-stargazer/percept_sat/pddlgym/pddlgym/pddl/maze/problem0.pddl"
+    domain_file = os.path.dirname(__file__) + "/../../pddl/simple.pddl"
+    problem_file = os.path.dirname(__file__) + "/../../pddl/simple/problem_0.pddl"
     problem = _parse(domain_file, problem_file)
     task = _ground(problem)
     #also read and parse a problem file with empty init state (not really empty, only whatever predicates we perceive)
@@ -60,6 +60,7 @@ if __name__ == "__main__":
     #print(num_to_vars)
     
     cnf_str = writer.get_cnf_str()
+    print(cnf_str)
     dimacs_str = format_cnfstr_to_dimacs(cnf_str)
 
     cnf = CNF(from_string=cnf_str)
