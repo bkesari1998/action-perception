@@ -55,7 +55,7 @@ if __name__ == "__main__":
     formula = get_plan_formula(task, plan_horizon)
     
     writer = CnfWriter()
-    vars_to_numbers = writer.write(formula, return_vars_to_num=True)
+    vars_to_numbers = writer.write(formula)
     num_to_vars = {v: k for k, v in vars_to_numbers.items()}
     #print(num_to_vars)
     
