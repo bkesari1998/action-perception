@@ -17,7 +17,7 @@
     (move_down)
     (move_right)
     (move_left)
-    (at hello)
+    (at test)
 
     (below f0-1f f0-0f)
     (above f0-0f f0-1f)
@@ -46,10 +46,10 @@
     (below f5-4f f5-3f)
     (above f5-3f f5-4f)
 
-    (is-goal hello)
+    (is-goal test)
         )
 
 (:goal (and
-    (at hello)
+    (at test)
     ))
 )

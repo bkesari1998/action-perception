@@ -91,4 +91,4 @@ class ProblemGenSimple(object):
 if __name__ == '__main__':
 
     gen = ProblemGenSimple()
-    gen.generate("test", "tes")
+    gen.generate("test", "test")
