@@ -13,6 +13,7 @@ class Planner(object):
         Initializes planner class.
 
         domain: path to pddl domain file.
+        returns: none
         '''
 
         self.domain = domain
@@ -39,5 +40,5 @@ if __name__ == '__main__':
     planner = Planner(domain_file)
 
     plan = planner.create_plan(problem_file)
-
+    print(type(plan[0]))
     print(plan)
