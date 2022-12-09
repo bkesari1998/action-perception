@@ -1,6 +1,5 @@
 import pddlgym
 from pddlgym_planners.fd import FD
-import time
 
 import matplotlib; matplotlib.use('agg')
 import imageio
