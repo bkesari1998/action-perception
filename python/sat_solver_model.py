@@ -8,7 +8,9 @@ from pyperplan.planner import _parse, _ground
 
 from pysat.solvers import Glucose3
 from pysat.formula import CNF
-from cnfwriter import CnfWriter, format_cnfstr_to_dimacs
+from cnf_writer import CnfWriter
+from cnf_formulas import format_cnfstr_to_dimacs, get_init_state_from_model, \
+    free_goal_state, free_initial_state, generate_formula
 
 import os
 from copy import deepcopy
@@ -46,12 +48,17 @@ class SATSolverModel:
         Receives report from action executer about whether one action is
         successfully executed, and update its belief based on that.
         """
+        formula, cnf, vars_to_nums, nums_to_vars = generate_formula(self.task, 3)
         pass
 
-    def sample(self, n=1):
+    def sample(self):
         """
         Samples from the current belief, give a solution to the SAT problem.
         """
         isSAT = self.solver.solve()
         if isSAT:
-            pass
+            model = self.solver.get_model()
+            return model
+        else:
+            return None
+

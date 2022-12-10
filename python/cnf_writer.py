@@ -3,35 +3,6 @@ import itertools
 import io
 
 
-def format_cnfstr_to_dimacs(cnf_str: str):
-    """
-    Convert a CNF object to a DIMACS string
-    """
-    cnf = CNF(from_string=cnf_str)
-    cnf_str = writer.get_cnf_str()
-    n_vars = cnf.nv
-    result = f"p cnf {n_vars} {len(cnf.clauses)}\n"+cnf_str
-
-    return result
-
-def free_initial_state(cnf_formula,nums_to_vars):
-    """
-    This function should remove the clauses that enforce the initial state (single variable clauses in the CNF formula)
-    """
-    new_cnf_formula = []
-    for clause in cnf_formula:
-        if len(clause)==1: #single variable clause
-            var = clause[0]
-            if abs(var) in nums_to_vars: 
-                name = nums_to_vars[abs(var)]
-                if name.endswith("-0"): # for the initial state
-                    continue
-
-        new_cnf_formula.append(clause)
-
-    return new_cnf_formula
-
-
 class CnfWriter:
     '''
     Class for converting plan formulas to CNF
