@@ -14,6 +14,8 @@ from cnf_formulas import format_cnfstr_to_dimacs, get_init_state_from_model, \
 
 import os
 from copy import deepcopy
+import random
+from datetime import datetime
 
 class SATSolverModel:
     def __init__(self, domain_file, problem_file, plan_horizon=9):
@@ -78,15 +80,17 @@ class SATSolverModel:
         # append it to the existing formula
         self.freed_cnf.append(possible_precondition_nums)
 
-    def sample(self):
+    def sample(self, num_samples):
         """
         Samples from the current belief, give a solution to the SAT problem.
         """
         solver = Glucose3(bootstrap_with=self.freed_cnf)
         isSAT = solver.solve()
         if isSAT:
-            model = solver.get_model()
-            return model
+            random.seed(datetime.now)
+            models = solver.enum_models()
+
+            return random.choices(models, k=num_samples)
         else:
             return None
 
