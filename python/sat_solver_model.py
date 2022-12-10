@@ -94,3 +94,25 @@ class SATSolverModel:
         else:
             return None
 
+    def sample_init_states(self, num_samples):
+        """
+        Returns init states from sampled models.
+        """
+
+        # Sample models
+        models = self.sample(num_samples)
+
+        init_states = []
+
+        # Loop over models
+        for model in models:
+
+            # Extract positive clauses from initial states
+            init_state = get_init_state_from_model(model, self.nums_to_vars)
+            init_state = [s for s in init_state if not s.startswith("(not ")]
+
+            # Append to list
+            init_states.append(init_state)
+
+        return init_states
+
