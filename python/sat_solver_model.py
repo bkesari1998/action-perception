@@ -73,16 +73,17 @@ class SATSolverModel:
 
         #translate to numbers and **negate** them
         possible_precondition_failures_nums = [-self.vars_to_nums[p] for p in possible_precondition_failures]
-        self.cnf.append(possible_precondition_failures_nums)
+        self.freed_cnf.append(possible_precondition_failures_nums)
         pass
 
     def sample(self):
         """
         Samples from the current belief, give a solution to the SAT problem.
         """
-        isSAT = self.solver.solve()
+        solver = Glucose3(bootstrap_with=self.freed_cnf)
+        isSAT = solver.solve()
         if isSAT:
-            model = self.solver.get_model()
+            model = solver.get_model()
             return model
         else:
             return None
