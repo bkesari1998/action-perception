@@ -74,16 +74,23 @@ class Environment(object):
         Wrapper for gym step function.
         '''
 
-        # Try executing the actions 
+        # Try executing the actions
+        success = None 
         try:
-            self.env.step(action)
+            _, _, done, _ = self.env.step(action)
             self.timestep += 1
+
+            success = True
 
         # Action fails
         except InvalidAction as e:
             print(e)
             img = self.render()
             self.save_render(img)
+
+            success = False
+
+        return action.name, self.timestep, success, done
 
     def reset(self):
         '''
