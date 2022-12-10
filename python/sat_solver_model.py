@@ -53,28 +53,30 @@ class SATSolverModel:
         operators = self.task.operators
         
         # see what could have failed
-        possible_precondition_failures = []
+        possible_preconditions = []
         for op in operators:
             # if the grounded operator is the current action
             if op.name.startswith("(" + action):
                 
                 for pre in op.preconditions:
-                    possible_precondition_failures.append(pre)
+                    possible_preconditions.append(pre)
 
         #any of these preconditions could have failed
-        print(possible_precondition_failures)
+        print(possible_preconditions)
         
         #add step number of failure
-        possible_precondition_failures = [p + f"-{iter}" for p in possible_precondition_failures]
+        possible_preconditions = [p + f"-{iter}" for p in possible_preconditions]
 
         #translate to numbers and **negate** them
         if success:
-            possible_precondition_failures_nums = [-self.vars_to_nums[p] for p in possible_precondition_failures]
+            # if success, one of it should be true
+            possible_precondition_nums = [self.vars_to_nums[p] for p in possible_preconditions]
         else:
-            possible_precondition_failures_nums = [self.vars_to_nums[p] for p in possible_precondition_failures]
+            # if failed, one of it should be false
+            possible_precondition_nums = [-self.vars_to_nums[p] for p in possible_preconditions]
 
-        self.freed_cnf.append(possible_precondition_failures_nums)
-        pass
+        # append it to the existing formula
+        self.freed_cnf.append(possible_precondition_nums)
 
     def sample(self):
         """
