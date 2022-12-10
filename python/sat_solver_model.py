@@ -49,10 +49,6 @@ class SATSolverModel:
         Receives report from action executer about whether one action is
         successfully executed, and update its belief based on that.
         """
-        if success:
-            # not handling the success case
-            return
-        
         # get all possible grounded operators
         operators = self.task.operators
         
@@ -72,7 +68,11 @@ class SATSolverModel:
         possible_precondition_failures = [p + f"-{iter}" for p in possible_precondition_failures]
 
         #translate to numbers and **negate** them
-        possible_precondition_failures_nums = [-self.vars_to_nums[p] for p in possible_precondition_failures]
+        if success:
+            possible_precondition_failures_nums = [-self.vars_to_nums[p] for p in possible_precondition_failures]
+        else:
+            possible_precondition_failures_nums = [self.vars_to_nums[p] for p in possible_precondition_failures]
+
         self.freed_cnf.append(possible_precondition_failures_nums)
         pass
 
