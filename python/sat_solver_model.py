@@ -37,6 +37,7 @@ class SATSolverModel:
         cnf_str = writer.get_cnf_str()
         # self.dimacs_str = format_cnfstr_to_dimacs(self.cnf_str)
         self.cnf = CNF(from_string=cnf_str)
+        self.freed_cnf = free_goal_state(free_initial_state(self.cnf))
 
         # configure a solver
         self.solver = Glucose3(bootstrap_with=cnf_str)
@@ -48,7 +49,31 @@ class SATSolverModel:
         Receives report from action executer about whether one action is
         successfully executed, and update its belief based on that.
         """
-        formula, cnf, vars_to_nums, nums_to_vars = generate_formula(self.task, 3)
+        if success:
+            # not handling the success case
+            return
+        
+        # get all possible grounded operators
+        operators = self.task.operators
+        
+        # see what could have failed
+        possible_precondition_failures = []
+        for op in operators:
+            # if the grounded operator is the current action
+            if op.name.startswith("(" + action):
+                
+                for pre in op.preconditions:
+                    possible_precondition_failures.append(pre)
+
+        #any of these preconditions could have failed
+        print(possible_precondition_failures)
+        
+        #add step number of failure
+        possible_precondition_failures = [p + f"-{iter}" for p in possible_precondition_failures]
+
+        #translate to numbers and **negate** them
+        possible_precondition_failures_nums = [-self.vars_to_nums[p] for p in possible_precondition_failures]
+        self.cnf.append(possible_precondition_failures_nums)
         pass
 
     def sample(self):
