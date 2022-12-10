@@ -23,6 +23,19 @@ class SATSolverModel:
         domain_file = os.path.dirname(__file__) + "/../../pddl/simple.pddl"
         problem_file = os.path.dirname(__file__) + "/../../pddl/simple/problem_0.pddl"
 
+        self.loc_dict = {
+            "(at f0-0f)-0": 0,
+            "(at f0-1f)-0": 1,
+            "(at f0-2f)-0": 2,
+            "(at f1-2f)-0": 3,
+            "(at f1-3f)-0": 4,
+            "(at f1-4f)-0": 5,
+            "(at f1-5f)-0": 6,
+            "(at f2-5f)-0": 7,
+            "(at f3-5f)-0": 8,
+            "(at f4-5f)-0": 3,
+        }
+
         self.problem = _parse(domain_file, problem_file)
         self.task = _ground(self.problem)
         self.plan_horizon = plan_horizon
@@ -115,4 +128,22 @@ class SATSolverModel:
             init_states.append(init_state)
 
         return init_states
+    
+    def get_start_rates(self, num_samples):
+
+        # Sample initial states from models
+        init_states = self.sample_init_states(num_samples)
+
+        # Create count of each starting location
+        start_counts = [0] * len(self.loc_dict.items)
+
+        # Count the number of times each starting location appears
+        for state in init_states:
+            start_counts[self.loc_dict[state[0]]] += 1
+        
+        startcounts /= len(start_counts)
+
+        # Return rate of each location
+        return start_counts
+
 
