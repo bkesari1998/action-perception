@@ -16,7 +16,7 @@ from planner import Planner
 from model import CNN
 from sat_solver_model import SATSolverModel
 
-default_domain_path = '/../pddl/simple.pddl'
+default_domain_path = '../pddl/simple.pddl'
 
 
 class Experiment(object):
@@ -74,7 +74,7 @@ class Experiment(object):
         prediction: prediction from the model.
         returns: agent location, goal location
         '''
-        prediction = prediction.detach().numpy()
+        prediction = prediction.detach().numpy().squeeze()
         agent_loc = np.argmax(prediction[:self.problem_generator.num_locations])
         goal_loc = np.argmax(prediction[self.problem_generator.num_locations:])
         return self.problem_generator.locations[agent_loc], \

@@ -20,8 +20,8 @@ from datetime import datetime
 class SATSolverModel:
     def __init__(self, domain_file, problem_file, plan_horizon=9):
         # parse the problem and domain file. TODO parameterize this
-        domain_file = os.path.dirname(__file__) + "/../../pddl/simple.pddl"
-        problem_file = os.path.dirname(__file__) + "/../../pddl/simple/problem_0.pddl"
+        domain_file = os.path.dirname(__file__) + "/" + "../pddl/simple.pddl"
+        problem_file = os.path.dirname(__file__) + "/" + "../pddl/simple/problem_0.pddl"
 
         self.loc_dict = {
             "(at f0-0f)-0": 0,
