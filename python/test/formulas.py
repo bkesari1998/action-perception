@@ -113,6 +113,22 @@ def free_goal_state(goal_var_names,cnf_formula,vars_to_nums):
 
     return new_cnf_formula
 
+def get_initial_state_clauses (cnf_formula, nums_to_vars):
+    """
+    This function should return the nums of initial state clauses
+    """
+
+    init_state_clause_nums = []
+    for clause in cnf_formula:
+        if len(clause)==1:
+            var = clause[0]
+            if abs(var) in num_to_vars:
+                name = num_to_vars[abs(var)]
+                if name.endswith("-0"):
+                    init_state_clause_nums.append(abs(var))
+
+    return init_state_clause_nums
+
 def free_initial_state(cnf_formula,nums_to_vars):
     """
     This function should remove the clauses that enforce the initial state (single variable clauses in the CNF formula)
@@ -151,6 +167,19 @@ def generate_formula(task,plan_horizon):
     cnf = CNF(from_string=cnf_str)
 
     return formula, cnf, vars_to_numbers, num_to_vars
+
+def get_exactly_one_clauses(var_list):
+    '''
+    Makes exactly-one constraint for variables in var_list in CNF
+    Args:
+        List of variables (positive ints)
+    Returns:
+        List of lists representing a set of clauses
+    '''
+    atleast_one = [i for i in var_list]
+    at_most_one = [[-i,-j] for i in var_list for j in var_list if not i==j] #no need for symmetric pairs
+    #(-x1 or -x2) and (-x2 or -x3) and (-x3 or -x4) and (-x2 or -x4)
+    return atleast_one, at_most_one
 
 
 if __name__ == "__main__":
@@ -212,8 +241,11 @@ if __name__ == "__main__":
 
     formula,cnf,vars_to_nums,nums_to_vars = generate_formula(task,3) # only need horizon 3 since that's where the failure happens
     freed_cnf_formula = free_goal_state(["(at f5-4f)-3"],cnf.clauses,vars_to_nums) # free the goal state
+    init = get_initial_state_clauses(freed_cnf_formula, num_to_vars)
+    at_least, at_most = get_exactly_one_clauses(init)
     freed_cnf_formula = free_initial_state(freed_cnf_formula,nums_to_vars) # free the initial state
-
+    freed_cnf_formula.append(at_least)
+    freed_cnf_formula.extend(at_most)
     
 
     operators = task.operators
@@ -228,25 +260,29 @@ if __name__ == "__main__":
 
     #any of these preconditions could have failed
     print(possible_precondition_failures)
-    #add step number of failure
+    # #add step number of failure
     possible_precondition_failures = [p+"-3" for p in possible_precondition_failures]
-    #translate to numbers and **negate** them
+    print(possible_precondition_failures)
+    # #translate to numbers and **negate** them
     possible_precondition_failures_nums = [-vars_to_nums[p] for p in possible_precondition_failures]
 
     print(possible_precondition_failures_nums)
-    #This is now a clause that says that at least one of the possible precondition failures must have happened
-    #add this to the formula
+    # #This is now a clause that says that at least one of the possible precondition failures must have happened
+    # #add this to the formula
     freed_cnf_formula.append(possible_precondition_failures_nums)
+
+
 
     #Now lets get models that are consistent with this formula
     solver = Glucose3(bootstrap_with=freed_cnf_formula)
-    for m in solver.enum_models():
-
+    for i, m in enumerate(solver.enum_models()):
+        print(i)
         init_state = get_init_state_from_model(m,nums_to_vars)
         #keep_positives
         init_state = [s for s in init_state if not s.startswith("(not ")]
 
         print(init_state)
+        if i > 9: break
         
 
 
