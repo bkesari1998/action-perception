@@ -60,4 +60,4 @@ class CNN(nn.Module):
     
     def update_model(self, x, y):
         # Define the update function
-        
+        pass

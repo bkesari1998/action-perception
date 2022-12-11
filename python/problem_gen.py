@@ -6,7 +6,8 @@ class ProblemGenSimple(object):
     '''
 
     def __init__(self, 
-                problem_file_path='/../pddl/simple/generated_problem.pddl'):
+                problem_file_path='../pddl/simple/generated_problem.pddl',
+                problem_file_template='../pddl/simple/problem_template.pddl'):
         
         '''
         Initializes problem generator for simple domain.
@@ -15,52 +16,13 @@ class ProblemGenSimple(object):
         returns: none.
         '''
 
-        self.problem_file_path = os.path.dirname(__file__) + problem_file_path
+        self.problem_file_path = os.path.dirname(__file__) + "/" + problem_file_path
+        self.problem_file_template = os.path.dirname(__file__) + "/" + problem_file_template
 
-        self.problem = \
-        "(define (problem simple_problem) (:domain simple_domain)\n\
-(:objects\n\
-    f0-0f - location\n\
-    f0-1f - location\n\
-    f0-2f - location\n\
-    f1-2f - location\n\
-    f2-2f - location\n\
-    f3-2f - location\n\
-    f4-2f - location\n\
-    f5-2f - location\n\
-    f5-3f - location\n\
-    f5-4f - location\n\
-)\n\n\
-(:init\n\
-    (move_up)\n\
-    (move_down)\n\
-    (move_right)\n\
-    (move_left)\n\
-    (at %s)\n\n\
-    (below f0-1f f0-0f)\n\
-    (above f0-0f f0-1f)\n\n\
-    (below f0-2f f0-1f)\n\
-    (above f0-1f f0-2f)\n\n\
-    (right f1-2f f0-2f)\n\
-    (left f0-2f f1-2f)\n\n\
-    (right f2-2f f1-2f)\n\
-    (left f1-2f f2-2f)\n\n\
-    (right f3-2f f2-2f)\n\
-    (left f2-2f f3-2f)\n\n\
-    (right f4-2f f3-2f)\n\
-    (left f3-2f f4-2f)\n\n\
-    (right f5-2f f4-2f)\n\
-    (left f4-2f f5-2f)\n\n\
-    (below f5-3f f5-2f)\n\
-    (above f5-2f f5-3f)\n\n\
-    (below f5-4f f5-3f)\n\
-    (above f5-3f f5-4f)\n\n\
-    (is-goal %s)\n\
-        )\n\n\
-(:goal (and\n\
-    (at %s)\n\
-    ))\n\
-)"
+        with open(self.problem_file_template) as f:
+            self.problem = f.read()
+            self.num_locations = self.problem.count("- location")
+
 
     def generate(self,
                 at,

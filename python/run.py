@@ -16,13 +16,17 @@ from planner import Planner
 from model import CNN
 from sat_solver_model import SATSolverModel
 
+default_domain_path = '/../pddl/simple.pddl'
+
+
 class Experiment(object):
-    def __init__(self):
+    def __init__(self, domain_path=default_domain_path):
         self.environment = Environment()
         self.problem_generator = ProblemGenSimple()
-        self.planner = Planner()
-        self.model = CNN()
-        self.satsolver = SATSolverModel()
+        self.planner = Planner(domain_path=domain_path)
+        self.domain_path = domain_path
+        self.model = CNN(num_locations=self.problem_generator.num_locations)
+        self.satsolver = None
 
     def run(self):
         '''
@@ -30,24 +34,27 @@ class Experiment(object):
         returns: nothing.
         '''
         # Get first observation
+        self.environment.reset()
         obs, info = self.environment.reset()
         # Initialize the model
         prediction = self.model.forward(obs)
         agent_loc, goal_loc = self.get_locations(prediction)
         # Generate the problem file for planner
         self.problem_generator.generate(agent_loc, goal_loc)
-        prob_path = '/../pddl/simple/generated_problem.pddl'
-        # domain_path = '/../pddl/simple.pddl'
+        prob_path = '../pddl/simple/generated_problem.pddl'
+
+        self.satsolver = SATSolverModel(domain_file=self.domain_path, problem_file=prob_path)
 
         plan = self.planner.create_plan(prob_path)
 
 
-        for act in plan:
+        for i, act in enumerate(plan):
             print(act)
-            obs,info = self.environment.step(act)
+            obs, info = self.environment.step(act)
             if info['result'] != 'success':
                 # start reasoning now for the loss function
-                reasoned_samples = self.satsolver.get_models()
+                self.satsolver.report_action_result(action=act.predicate.name, iter=i, success=False)
+                reasoned_samples = self.satsolver.get_start_rates()
                 self.model.train(x = obs, y = reasoned_samples)
                 break
 

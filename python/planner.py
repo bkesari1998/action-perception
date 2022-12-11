@@ -1,4 +1,5 @@
 import sys
+from typing import List
 sys.path.append('../../')
 
 from pddlgym.structs import Literal, Predicate
@@ -25,7 +26,7 @@ class Planner(object):
         self.task = None
 
     def create_plan(self,
-                    problem_path):
+                    problem_path) -> List[Literal]:
         '''
         Creates task for solver.
 
@@ -36,6 +37,7 @@ class Planner(object):
         problem_path = os.path.dirname(__file__) + problem_path
 
         problem = _parse(self.domain_path, problem_path)
+        
         task = _ground(problem)
 
         # Use sat solver to create plan

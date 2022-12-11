@@ -101,4 +101,4 @@ class Environment(object):
         self.timestep = 0
 
         # Reset environment
-        self.env.reset()
+        return self.env.reset()
