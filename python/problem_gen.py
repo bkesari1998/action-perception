@@ -1,5 +1,17 @@
 import os
 
+
+def get_locations(problem_str):
+    """
+    Gets the set of all locations from the PDDL problem file.
+    """
+    locations = []
+    for line in problem_str.split('\n'):
+        if '- location' in line:
+            locations.append(line.split('- location')[0].strip())
+    return locations
+
+
 class ProblemGenSimple(object):
     '''
     Class to generate problem files on the fly for simple domain.
@@ -21,7 +33,9 @@ class ProblemGenSimple(object):
 
         with open(self.problem_file_template) as f:
             self.problem = f.read()
-            self.num_locations = self.problem.count("- location")
+        
+        self.locations = get_locations(self.problem)
+        self.num_locations = len(self.locations)
 
 
     def generate(self,

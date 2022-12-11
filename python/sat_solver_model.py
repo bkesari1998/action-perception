@@ -19,7 +19,7 @@ from datetime import datetime
 
 class SATSolverModel:
     def __init__(self, domain_file, problem_file, plan_horizon=9):
-        # parse the problem and domain file.
+        # parse the problem and domain file. TODO parameterize this
         domain_file = os.path.dirname(__file__) + "/../../pddl/simple.pddl"
         problem_file = os.path.dirname(__file__) + "/../../pddl/simple/problem_0.pddl"
 
@@ -28,12 +28,12 @@ class SATSolverModel:
             "(at f0-1f)-0": 1,
             "(at f0-2f)-0": 2,
             "(at f1-2f)-0": 3,
-            "(at f1-3f)-0": 4,
-            "(at f1-4f)-0": 5,
-            "(at f1-5f)-0": 6,
-            "(at f2-5f)-0": 7,
-            "(at f3-5f)-0": 8,
-            "(at f4-5f)-0": 3,
+            "(at f2-2f)-0": 4,
+            "(at f3-2f)-0": 5,
+            "(at f4-2f)-0": 6,
+            "(at f5-2f)-0": 7,
+            "(at f5-3f)-0": 8,
+            "(at f5-4f)-0": 3,
         }
 
         self.problem = _parse(domain_file, problem_file)

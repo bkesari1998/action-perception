@@ -8,6 +8,8 @@ from gym import error
 from pddlgym.core import InvalidAction
 import imageio
 
+import matplotlib; matplotlib.use('agg')
+
 class Environment(object):
     '''
     Wrapper for pddlgym environment.
@@ -85,12 +87,21 @@ class Environment(object):
         # Action fails
         except InvalidAction as e:
             print(e)
-            img = self.render()
-            self.save_render(img)
-
             success = False
 
-        return action.name, self.timestep, success, done
+        img = self.render()
+        self.save_render(img)
+
+        return self.rendering_to_obs(img), self.timestep, done, {success: success}
+    
+    def rendering_to_obs(self, rendering):
+        '''
+        Converts rendering to observation.
+        rendering: image array of rendered environment.
+        returns: observation array.
+        '''
+        return rendering.transpose(2, 0, 1)[:3]
+
 
     def reset(self):
         '''
@@ -101,4 +112,7 @@ class Environment(object):
         self.timestep = 0
 
         # Reset environment
-        return self.env.reset()
+        obs, info = self.env.reset()
+        # re-arrange order of axis is needed for pytorch
+        img = self.render()
+        return self.rendering_to_obs(img), info

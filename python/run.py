@@ -34,7 +34,6 @@ class Experiment(object):
         returns: nothing.
         '''
         # Get first observation
-        self.environment.reset()
         obs, info = self.environment.reset()
         # Initialize the model
         prediction = self.model.forward(obs)
@@ -50,12 +49,15 @@ class Experiment(object):
 
         for i, act in enumerate(plan):
             print(act)
-            obs, info = self.environment.step(act)
+            obs, timestep, done, info = self.environment.step(act)
             if info['result'] != 'success':
                 # start reasoning now for the loss function
                 self.satsolver.report_action_result(action=act.predicate.name, iter=i, success=False)
                 reasoned_samples = self.satsolver.get_start_rates()
                 self.model.train(x = obs, y = reasoned_samples)
+                break
+            elif done:
+                # todo also maybe do processing here
                 break
 
     def load_model():
@@ -64,16 +66,19 @@ class Experiment(object):
     def train_model():
         pass
 
-    def get_locations(prediction):
+    def get_locations(self, prediction):
         '''
         Gets the agent and goal locations from the prediction.
+        agent location first, goal second.
 
         prediction: prediction from the model.
         returns: agent location, goal location
         '''
-        agent_loc = None
-        goal_loc = None
-        return agent_loc, goal_loc
+        prediction = prediction.detach().numpy()
+        agent_loc = np.argmax(prediction[:self.problem_generator.num_locations])
+        goal_loc = np.argmax(prediction[self.problem_generator.num_locations:])
+        return self.problem_generator.locations[agent_loc], \
+            self.problem_generator.locations[goal_loc]
         
 
 if __name__ == '__main__':

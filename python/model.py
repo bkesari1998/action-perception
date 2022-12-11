@@ -10,15 +10,17 @@ class CNN(nn.Module):
          # Define the layers of the CNN
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1)
         self.relu1 = nn.ReLU()
-        self.maxpool1 = nn.MaxPool2d(kernel_size=2)
+        self.maxpool1 = nn.MaxPool2d(kernel_size=8)
         self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1)
         self.relu2 = nn.ReLU()
-        self.maxpool2 = nn.MaxPool2d(kernel_size=2)
-        self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(32*7*7, num_locations)
-        self.fc2 = nn.Linear(32*7*7, num_locations)
+        self.maxpool2 = nn.MaxPool2d(kernel_size=8)
+        self.flatten = nn.Flatten(1, -1)
+        self.fc1 = nn.Linear(in_features=8700, out_features=128)
+        self.fc2 = nn.Linear(in_features=128, out_features=num_locations * 2)
 
     def forward(self, x):
+        if type(x) != torch.Tensor:
+            x = torch.tensor(x, dtype=torch.float32)
         # Define the forward pass of the CNN
         x = self.conv1(x)
         x = self.relu1(x)
@@ -48,6 +50,10 @@ class CNN(nn.Module):
         return x.argmax(dim=1)
 
     def train(self, x, y, lr, epochs):
+        if type(x) != torch.Tensor:
+            x = torch.tensor(x, dtype=torch.float32)
+        if type(y) != torch.Tensor:
+            y = torch.tensor(y, dtype=torch.float32)
         # Define the train function
         optimizer = self.optimizer(lr)
         for epoch in range(epochs):
