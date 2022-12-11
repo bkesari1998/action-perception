@@ -141,7 +141,7 @@ class SATSolverModel:
         for state in init_states:
             start_counts[self.loc_dict[state[0]]] += 1
         
-        startcounts /= len(start_counts)
+        start_counts /= len(start_counts)
 
         # Return rate of each location
         return start_counts

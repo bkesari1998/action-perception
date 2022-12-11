@@ -1,7 +1,7 @@
 import subprocess
 from pyperplan.search.sat import get_plan_formula
 from pyperplan.planner import _parse, _ground
-from cnfwriter import CnfWriter
+from cnf_writer import CnfWriter
 from pysat.solvers import Glucose3
 from io import StringIO
 from pysat.formula import CNF
