@@ -63,6 +63,9 @@ class Experiment(object):
             last_obs = obs
             last_act = act
             if info['result'] != 'success':
+                # start reasoning now for the loss function
+                reasoned_samples = self.satsolver.get_models()
+                self.model.train(x = obs, y = reasoned_samples)
                 break
         # now also update the model for the last action
         self.satsolver.report_action_result(action=last_act.predicate.name, iter=i, success=False)
