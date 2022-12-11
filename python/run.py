@@ -68,7 +68,7 @@ class Experiment(object):
                 self.model.train(x = obs, y = reasoned_samples)
                 break
         # now also update the model for the last action
-        self.satsolver.report_action_result(action=last_act.predicate.name, iter=i, success=False)
+        self.satsolver.report_action_result(action=last_act.predicate.name, iter=i, success=info['result'])
         reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
         self.model.train(x = last_obs, y = reasoned_samples)
         return done
