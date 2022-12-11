@@ -22,7 +22,7 @@ class Planner(object):
         returns: none
         '''
 
-        self.domain_path = os.path.dirname(__file__) + domain_path
+        self.domain_path = os.path.dirname(__file__) + "/" + domain_path
         self.task = None
 
     def create_plan(self,
@@ -34,7 +34,7 @@ class Planner(object):
         returns: plan created by sat solver
         '''
 
-        problem_path = os.path.dirname(__file__) + problem_path
+        problem_path = os.path.dirname(__file__) + "/" + problem_path
 
         problem = _parse(self.domain_path, problem_path)
         

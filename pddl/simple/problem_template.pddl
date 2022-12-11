@@ -46,7 +46,7 @@
     (below f5-4f f5-3f)
     (above f5-3f f5-4f)
 
-    (is-goal f5-4f)
+    (is-goal %s)
 )
 
 (:goal (at %s))

@@ -78,6 +78,7 @@ class Environment(object):
 
         # Try executing the actions
         success = None 
+        done = False
         try:
             _, _, done, _ = self.env.step(action)
             self.timestep += 1
@@ -92,7 +93,7 @@ class Environment(object):
         img = self.render()
         self.save_render(img)
 
-        return self.rendering_to_obs(img), self.timestep, done, {success: success}
+        return self.rendering_to_obs(img), self.timestep, done, {"result": success}
     
     def rendering_to_obs(self, rendering):
         '''

@@ -17,11 +17,17 @@ from copy import deepcopy
 import random
 from datetime import datetime
 
+random.seed(datetime.now)
+
+# def get_goal(problem):
+# 
+# 
+
 class SATSolverModel:
     def __init__(self, domain_file, problem_file, plan_horizon=9):
         # parse the problem and domain file. TODO parameterize this
-        domain_file = os.path.dirname(__file__) + "/" + "../pddl/simple.pddl"
-        problem_file = os.path.dirname(__file__) + "/" + "../pddl/simple/problem_0.pddl"
+        domain_file = os.path.dirname(__file__) + "/" + domain_file
+        problem_file = os.path.dirname(__file__) + "/" + problem_file
 
         self.loc_dict = {
             "(at f0-0f)-0": 0,
@@ -52,10 +58,14 @@ class SATSolverModel:
         cnf_str = writer.get_cnf_str()
         # self.dimacs_str = format_cnfstr_to_dimacs(self.cnf_str)
         self.cnf = CNF(from_string=cnf_str)
-        self.freed_cnf = free_goal_state(free_initial_state(self.cnf))
+
+        # free cnf
+        goals = [goal + "-" + str(self.plan_horizon) for goal in list(self.task.goals)]
+        self.freed_cnf = free_goal_state(goals, self.cnf, self.vars_to_num)
+        self.freed_cnf = free_initial_state(self.freed_cnf, self.num_to_vars)
 
         # configure a solver
-        self.solver = Glucose3(bootstrap_with=cnf_str)
+        self.solver = Glucose3(bootstrap_with=self.freed_cnf)
         
         pass
 
@@ -85,10 +95,10 @@ class SATSolverModel:
         #translate to numbers and **negate** them
         if success:
             # if success, one of it should be true
-            possible_precondition_nums = [self.vars_to_nums[p] for p in possible_preconditions]
+            possible_precondition_nums = [self.vars_to_num[p] for p in possible_preconditions]
         else:
             # if failed, one of it should be false
-            possible_precondition_nums = [-self.vars_to_nums[p] for p in possible_preconditions]
+            possible_precondition_nums = [-self.vars_to_num[p] for p in possible_preconditions]
 
         # append it to the existing formula
         self.freed_cnf.append(possible_precondition_nums)
@@ -100,10 +110,9 @@ class SATSolverModel:
         solver = Glucose3(bootstrap_with=self.freed_cnf)
         isSAT = solver.solve()
         if isSAT:
-            random.seed(datetime.now)
             models = solver.enum_models()
 
-            return random.choices(models, k=num_samples)
+            return random.choices(list(models), k=num_samples)
         else:
             return None
 

@@ -18,6 +18,8 @@ from sat_solver_model import SATSolverModel
 
 default_domain_path = '../pddl/simple.pddl'
 
+MONTE_CARLO_SAMPLES=10
+
 
 class Experiment(object):
     def __init__(self, domain_path=default_domain_path):
@@ -53,7 +55,7 @@ class Experiment(object):
             if info['result'] != 'success':
                 # start reasoning now for the loss function
                 self.satsolver.report_action_result(action=act.predicate.name, iter=i, success=False)
-                reasoned_samples = self.satsolver.get_start_rates()
+                reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
                 self.model.train(x = obs, y = reasoned_samples)
                 break
             elif done:
