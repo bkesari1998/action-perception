@@ -66,13 +66,14 @@ class CNN(nn.Module):
             y = torch.tensor(y, dtype=torch.float32)
         # Define the train function
         optimizer = self.optimizer(lr)
-        for epoch in range(epochs):
-            optimizer.zero_grad()
-            y_pred = self.forward(x)
-            loss = self.loss(y_pred, y)
-            loss.backward()
-            optimizer.step()
-            print(f"Epoch: {epoch}, Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}")
+        # for epoch in range(epochs):
+        optimizer.zero_grad()
+        y_pred = self.forward(x)
+        loss = self.loss(y_pred, y)
+        loss.backward()
+        optimizer.step()
+        return loss.item(), self.accuracy(y_pred, y).item()
+        # print(f"Epoch: {epoch}, Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}")
     
     def update_model(self, x, y):
         # Define the update function

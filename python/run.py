@@ -2,6 +2,7 @@ import time
 import math
 import sys
 import os
+import copy
 import numpy as np
 
 # Path to pddlgym
@@ -54,24 +55,24 @@ class Experiment(object):
         plan = self.planner.create_plan(prob_path)
         # Initialize the SAT solver
         self.satsolver = SATSolverModel(domain_file=self.domain_path, problem_file=prob_path, plan_horizon=len(plan))
-
+        print (plan)
 
         last_obs, last_act = None, None
         for i, act in enumerate(plan):
             print(act)
             obs, timestep, done, info = self.environment.step(act)
-            last_obs = obs
-            last_act = act
+            last_obs = copy.deepcopy(obs)
+            last_act = copy.deepcopy(act)
             if info['result'] != 'success':
                 # start reasoning now for the loss function
-                reasoned_samples = self.satsolver.get_models()
-                self.model.train(x = obs, y = reasoned_samples)
+                reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
+                loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
                 break
         # now also update the model for the last action
         self.satsolver.report_action_result(action=last_act.predicate.name, iter=i, success=info['result'])
         reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
-        self.model.train(x = last_obs, y = reasoned_samples)
-        return done
+        loss, accuracy = self.model.train(x = last_obs, y = reasoned_samples)
+        return done, loss, accuracy
 
     def load_model():
         pass
@@ -79,7 +80,8 @@ class Experiment(object):
     def train_model(self, num_eps):
         reset = True
         for episode in range(num_eps):
-            reset = self.run(reset)
+            reset, loss, accuracy = self.run(reset)
+            print('Episode: ', episode, ' done: ', reset, 'loss: ', loss, 'accuracy: ', accuracy)
 
 
     def get_locations(self, prediction):
