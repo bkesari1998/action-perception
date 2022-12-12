@@ -11,13 +11,12 @@ from pysat.formula import CNF
 from cnf_writer import CnfWriter
 from cnf_formulas import format_cnfstr_to_dimacs, get_init_state_from_model, \
     free_goal_state, free_initial_state, generate_formula
+from sat_solver_sampler import cmsgen_solve
+
+import numpy as np
 
 import os
 from copy import deepcopy
-import random
-from datetime import datetime
-
-random.seed(datetime.now)
 
 # def get_goal(problem):
 # 
@@ -107,14 +106,7 @@ class SATSolverModel:
         """
         Samples from the current belief, give a solution to the SAT problem.
         """
-        solver = Glucose3(bootstrap_with=self.freed_cnf)
-        isSAT = solver.solve()
-        if isSAT:
-            models = solver.enum_models()
-
-            return random.choices(list(models), k=num_samples)
-        else:
-            return None
+        return cmsgen_solve(CNF(from_clauses=self.freed_cnf), num_samples)
 
     def sample_init_states(self, num_samples):
         """
@@ -130,7 +122,7 @@ class SATSolverModel:
         for model in models:
 
             # Extract positive clauses from initial states
-            init_state = get_init_state_from_model(model, self.nums_to_vars)
+            init_state = get_init_state_from_model(model, self.num_to_vars)
             init_state = [s for s in init_state if not s.startswith("(not ")]
 
             # Append to list
@@ -144,7 +136,7 @@ class SATSolverModel:
         init_states = self.sample_init_states(num_samples)
 
         # Create count of each starting location
-        start_counts = [0] * len(self.loc_dict.items)
+        start_counts = np.zeros(len(self.loc_dict))
 
         # Count the number of times each starting location appears
         for state in init_states:

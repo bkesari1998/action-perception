@@ -59,7 +59,7 @@ class CNN(nn.Module):
         # Define the predict function
         return x.argmax(dim=1)
 
-    def train(self, x, y, lr, epochs):
+    def train(self, x, y, lr=0.0001, epochs=10):
         if type(x) != torch.Tensor:
             x = torch.tensor(x, dtype=torch.float32)
         if type(y) != torch.Tensor:
