@@ -90,6 +90,8 @@ class Experiment(object):
                 # reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
                 # loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
                 break
+            elif done:
+                break
                 
         return done, loss, accuracy
 
@@ -115,7 +117,7 @@ class Experiment(object):
         if prediction[self.problem_generator.num_locations]:
             for loc in exclude_agent_loc:
                 # manually manipulate the prediction to exclude the goal
-                prediction[loc] = 0
+                prediction[loc] = -100
         # pick loc to be the one with the highest probability
         agent_loc = np.argmax(prediction[:self.problem_generator.num_locations])
         goal_loc = np.argmax(prediction[self.problem_generator.num_locations:])

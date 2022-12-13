@@ -32,15 +32,15 @@ class Environment(object):
                 # Create environmet
                 self.env = pddlgym.make(env_name, raise_error_on_invalid_action=True)
 
-                # Fix problem index
-                problem_index_fixed = False
-                while not problem_index_fixed:
-                    try:
-                        self.env.fix_problem_index(problem_index)
-                        problem_index_fixed = True
-                    except: # add exception
-                        # Ask user to input existing problem index
-                        problem_index = input("Please input existing problem index")
+                # # Fix problem index
+                # problem_index_fixed = False
+                # while not problem_index_fixed:
+                #     try:
+                #         self.env.fix_problem_index(problem_index)
+                #         problem_index_fixed = True
+                #     except: # add exception
+                #         # Ask user to input existing problem index
+                #         problem_index = input("Please input existing problem index")
 
             except error.NameNotFound as e:
                 print(e)
@@ -127,7 +127,7 @@ class Environment(object):
         return rendering.transpose(2, 0, 1)[:3]
 
 
-    def reset(self):
+    def reset(self, problem_index=None):
         '''
         Wrapper for gym reset function. Fixes problem index for pddl problem file.
         '''
@@ -136,6 +136,8 @@ class Environment(object):
         self.timestep = 0
 
         # Reset environment
+        if problem_index is not None:
+            self.env.fix_problem_index(problem_index)
         obs, info = self.env.reset()
         # re-arrange order of axis is needed for pytorch
         img = self.render()
