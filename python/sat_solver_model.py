@@ -84,29 +84,35 @@ class SATSolverModel:
         
         # see what could have failed
         possible_preconditions = []
+        possible_postconditions = []
         for op in operators:
             # if the grounded operator is the current action
             if op.name.startswith("(" + action):
-                
-                for pre in op.preconditions:
-                    possible_preconditions.append(pre)
+                possible_preconditions += list(op.preconditions)
+                possible_postconditions += list(op.add_effects)
 
         #any of these preconditions could have failed
         # print("       Possible related preconditions:", "; ".join(possible_preconditions))
         
         #add step number of failure
         possible_preconditions = [p + f"-{iter}" for p in possible_preconditions]
+        possible_postconditions = [p + f"-{iter + 1}" for p in possible_postconditions]
 
         #translate to numbers and **negate** them
         if success:
             # if success, one of it should be true
             possible_precondition_nums = [self.vars_to_num[p] for p in possible_preconditions]
+            # possible_postcondition_nums = []
+            possible_postcondition_nums = [self.vars_to_num[p] for p in possible_postconditions]
         else:
             # if failed, one of it should be false
             possible_precondition_nums = [-self.vars_to_num[p] for p in possible_preconditions]
+            possible_postcondition_nums = []
 
         # append it to the existing formula
         self.freed_cnf.append(possible_precondition_nums)
+        if len(possible_postcondition_nums) > 0:
+            self.freed_cnf.append(possible_postcondition_nums)
 
     def sample(self, num_samples):
         """
