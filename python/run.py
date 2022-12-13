@@ -17,6 +17,8 @@ from planner import Planner
 from model import CNN
 from sat_solver_model import SATSolverModel
 
+from model_evaluate import evaluate_model
+
 default_domain_path = '../pddl/simple.pddl'
 
 MONTE_CARLO_SAMPLES=100
@@ -123,9 +125,7 @@ class Experiment(object):
         goal_loc = np.argmax(prediction[self.problem_generator.num_locations:])
         return self.problem_generator.locations[agent_loc], \
             self.problem_generator.locations[goal_loc]
-    
-    def evaluate_model(self):
-        pass
+
         
 
 if __name__ == '__main__':
@@ -137,4 +137,6 @@ if __name__ == '__main__':
         done, _, _ = exp_1.run(epi=i, reset=done)
         if done:
             print("Done!")
+        acc, cross_entropy = evaluate_model(exp_1.model)
+        print("Evaluation On pre-generated dataset: Accuracy:", acc.numpy(), "  Cross Entropy:", cross_entropy.numpy())
         print()
