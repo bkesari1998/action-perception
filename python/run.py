@@ -21,7 +21,7 @@ from model_evaluate import evaluate_model
 
 default_domain_path = '../pddl/simple.pddl'
 
-MONTE_CARLO_SAMPLES=100
+MONTE_CARLO_SAMPLES=1000
 
 
 class Experiment(object):
@@ -84,8 +84,6 @@ class Experiment(object):
                 "New Location:", info['location']['after'], 
                 "successful" if info['result'] else "failed"
             )
-            reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
-            loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
 
             if not info['result']:
                 # start reasoning now for the loss function
@@ -94,7 +92,10 @@ class Experiment(object):
                 break
             elif done:
                 break
-                
+        reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
+        print(reasoned_samples)
+        loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
+
         return done, loss, accuracy
 
     def load_model():
@@ -116,15 +117,17 @@ class Experiment(object):
         returns: agent location, goal location
         '''
         prediction = prediction.detach().numpy().squeeze()
-        if prediction[self.problem_generator.num_locations]:
-            for loc in exclude_agent_loc:
-                # manually manipulate the prediction to exclude the goal
-                prediction[loc] = -100
+        for loc in exclude_agent_loc:
+            # manually manipulate the prediction to exclude the goal
+            prediction[loc] = -100
         # pick loc to be the one with the highest probability
         agent_loc = np.argmax(prediction[:self.problem_generator.num_locations])
-        goal_loc = np.argmax(prediction[self.problem_generator.num_locations:])
+        if prediction.shape[0] >= self.problem_generator.num_locations * 2:
+            goal_loc = np.argmax(prediction[self.problem_generator.num_locations:])
+        else:
+            goal_loc = None
         return self.problem_generator.locations[agent_loc], \
-            self.problem_generator.locations[goal_loc]
+            self.problem_generator.locations[goal_loc] if goal_loc is not None else None
 
         
 

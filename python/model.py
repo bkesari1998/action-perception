@@ -27,7 +27,7 @@ class CNN(nn.Module):
             nn.LazyLinear(num_locations),
 
             # softmax
-            nn.Softmax(dim=1)
+            # nn.Softmax(dim=1)
         )
 
     def forward(self, x):

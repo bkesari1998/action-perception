@@ -137,7 +137,7 @@ class SATSolverModel:
         # print("       Sampled initial states:", "; ".join([state[0].split("(at ")[1].split(")-0")[0] for state in init_goal_states][:20]))
         return init_goal_states
     
-    def get_start_rates(self, num_samples):
+    def get_start_rates(self, num_samples, include_goals=False):
 
         # Sample initial states from models
         init_states = self.sample_init_states(num_samples)
@@ -157,10 +157,12 @@ class SATSolverModel:
                     state_var_2 = "-".join(new_name)
                     goal_counts[self.loc_dict[state_var_2]] += 1
         
-        start_counts /= len(start_counts)
-        goal_counts /= len(goal_counts)
+        start_counts /= len(init_states)
+        goal_counts /= len(init_states)
 
         # Return rate of each location
-        return np.concatenate([start_counts, goal_counts])[np.newaxis, :]
-
+        if include_goals:
+            return np.concatenate([start_counts, goal_counts])[np.newaxis, :]
+        else:
+            return start_counts[np.newaxis, :]
 
