@@ -49,8 +49,12 @@ class Experiment(object):
         
         # Initialize the model
         prediction = self.model.forward(obs)
-        agent_loc, goal_loc = self.get_locations(prediction)
+
+        ### here, we manually set the goal location
+        # location 9 (f5-4f) is the goal location, so exclude it
+        agent_loc, goal_loc = self.get_locations(prediction, exclude_agent_loc=[9])
         goal_loc = "f5-4f"
+
         # Generate the problem file for planner
         self.problem_generator.generate(agent_loc, goal_loc)
         print(f"Predicted initial loc: {agent_loc}, goal: {goal_loc}")
@@ -73,8 +77,9 @@ class Experiment(object):
 
             self.satsolver.report_action_result(action=act.predicate.name, iter=i, success=info['result'])
             print("    TimeStep", i, 
-                "location:", info['location'], 
+                "Prev Location:", info['location']['before'],
                 "Action:", act, 
+                "New Location:", info['location']['after'], 
                 "successful" if info['result'] else "failed"
             )
             reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
@@ -98,7 +103,7 @@ class Experiment(object):
             print('Episode: ', episode, ' done: ', reset, 'loss: ', loss, 'accuracy: ', accuracy)
 
 
-    def get_locations(self, prediction):
+    def get_locations(self, prediction, exclude_agent_loc=[]):
         '''
         Gets the agent and goal locations from the prediction.
         agent location first, goal second.
@@ -107,10 +112,18 @@ class Experiment(object):
         returns: agent location, goal location
         '''
         prediction = prediction.detach().numpy().squeeze()
+        if prediction[self.problem_generator.num_locations]:
+            for loc in exclude_agent_loc:
+                # manually manipulate the prediction to exclude the goal
+                prediction[loc] = 0
+        # pick loc to be the one with the highest probability
         agent_loc = np.argmax(prediction[:self.problem_generator.num_locations])
         goal_loc = np.argmax(prediction[self.problem_generator.num_locations:])
         return self.problem_generator.locations[agent_loc], \
             self.problem_generator.locations[goal_loc]
+    
+    def evaluate_model(self):
+        pass
         
 
 if __name__ == '__main__':
@@ -120,4 +133,6 @@ if __name__ == '__main__':
     done = True
     for i in range(1000):
         done, _, _ = exp_1.run(epi=i, reset=done)
+        if done:
+            print("Done!")
         print()

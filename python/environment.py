@@ -91,7 +91,9 @@ class Environment(object):
         # Try executing the actions
         success = None 
         done = False
+        
         obs = None
+        prev_loc = self.location
         try:
             obs, _, done, _ = self.env.step(action)
             self.timestep += 1
@@ -108,7 +110,10 @@ class Environment(object):
 
         info = {
             "result": success, 
-            "location": self.get_cache_location(obs)
+            "location": {
+                "before": prev_loc,
+                "after": self.get_cache_location(obs)
+            }
         }
 
         return self.rendering_to_obs(img), self.timestep, done, info
