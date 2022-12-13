@@ -7,17 +7,6 @@ import torch.optim as optim
 class CNN(nn.Module):
     def __init__(self, num_locations):
         super(CNN, self).__init__()
-         # Define the layers of the CNN
-        # self.conv1 = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, padding=1)
-        # self.relu1 = nn.ReLU()
-        # self.maxpool1 = nn.MaxPool2d(kernel_size=8)
-        # self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding=1)
-        # self.relu2 = nn.ReLU()
-        # self.maxpool2 = nn.MaxPool2d(kernel_size=8)
-        # self.flatten = nn.Flatten(1, -1)
-        # self.fc1 = nn.Linear(in_features=8700, out_features=128)
-        # self.fc2 = nn.Linear(in_features=128, out_features=num_locations * 2)
-
         self.model = nn.Sequential(
             nn.Conv2d(3, 16, kernel_size=4, padding=0),
             nn.ReLU(),
