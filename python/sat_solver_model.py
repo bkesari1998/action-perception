@@ -9,8 +9,9 @@ from pyperplan.planner import _parse, _ground
 from pysat.solvers import Glucose3
 from pysat.formula import CNF
 from cnf_writer import CnfWriter
-from cnf_formulas import format_cnfstr_to_dimacs, get_init_state_from_model, \
-    free_goal_state, free_initial_state, generate_formula
+from cnf_formulas import format_cnfstr_to_dimacs, get_init_goal_state_from_model, \
+    free_goal_state, free_initial_state, generate_formula, get_exactly_one_clauses, \
+    get_initial_state_clauses
 from sat_solver_sampler import cmsgen_solve
 
 import numpy as np
@@ -38,8 +39,9 @@ class SATSolverModel:
             "(at f4-2f)-0": 6,
             "(at f5-2f)-0": 7,
             "(at f5-3f)-0": 8,
-            "(at f5-4f)-0": 3,
+            "(at f5-4f)-0": 9,
         }
+        # TODO add goals
 
         self.problem = _parse(domain_file, problem_file)
         self.task = _ground(self.problem)
@@ -60,12 +62,16 @@ class SATSolverModel:
 
         # free cnf
         goals = [goal + "-" + str(self.plan_horizon) for goal in list(self.task.goals)]
+
+        # remove the goal states since we made an assumption but don't need it
         self.freed_cnf = free_goal_state(goals, self.cnf, self.vars_to_num)
+        init_states = get_initial_state_clauses(self.freed_cnf, self.num_to_vars)
         self.freed_cnf = free_initial_state(self.freed_cnf, self.num_to_vars)
 
-        # configure a solver
-        self.solver = Glucose3(bootstrap_with=self.freed_cnf)
-        
+        # add exactly one clause constraints on the initial pos and goal pos
+        atleast_one, at_most_one = get_exactly_one_clauses(init_states)
+        self.freed_cnf.append(atleast_one)
+        self.freed_cnf += at_most_one
         pass
 
     def report_action_result(self, action: str, iter: int, success: bool=False):
@@ -86,7 +92,7 @@ class SATSolverModel:
                     possible_preconditions.append(pre)
 
         #any of these preconditions could have failed
-        print(possible_preconditions)
+        print("    Possible failed preconfitions:", "; ".join(possible_preconditions))
         
         #add step number of failure
         possible_preconditions = [p + f"-{iter}" for p in possible_preconditions]
@@ -116,19 +122,19 @@ class SATSolverModel:
         # Sample models
         models = self.sample(num_samples)
 
-        init_states = []
+        init_goal_states = []
 
         # Loop over models
         for model in models:
 
             # Extract positive clauses from initial states
-            init_state = get_init_state_from_model(model, self.num_to_vars)
-            init_state = [s for s in init_state if not s.startswith("(not ")]
+            ig_state = get_init_goal_state_from_model(model, self.num_to_vars, plan_horizon=self.plan_horizon)
+            ig_state_filtered = [s for s in ig_state if 'not' not in s]
 
             # Append to list
-            init_states.append(init_state)
+            init_goal_states.append(ig_state_filtered)
 
-        return init_states
+        return init_goal_states
     
     def get_start_rates(self, num_samples):
 
@@ -137,14 +143,23 @@ class SATSolverModel:
 
         # Create count of each starting location
         start_counts = np.zeros(len(self.loc_dict))
+        goal_counts = np.zeros(len(self.loc_dict))
 
         # Count the number of times each starting location appears
         for state in init_states:
-            start_counts[self.loc_dict[state[0]]] += 1
+            for state_var in state:
+                if ")-0" in state_var:
+                    start_counts[self.loc_dict[state_var]] += 1
+                else:
+                    new_name = state_var.split("-")[:-1]
+                    new_name.append("0")
+                    state_var_2 = "-".join(new_name)
+                    goal_counts[self.loc_dict[state_var_2]] += 1
         
         start_counts /= len(start_counts)
+        goal_counts /= len(goal_counts)
 
         # Return rate of each location
-        return start_counts
+        return np.concatenate([start_counts, goal_counts])[np.newaxis, :]
 
 

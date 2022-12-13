@@ -77,7 +77,7 @@ def interpret_formula(formula,m,vars_to_nums, nums_to_vars):
     truths = [nums_to_vars[i] for i in m if i>0 and i in vars_to_nums.values()]
     falses = [nums_to_vars[abs(i)] for i in m if i<0 and abs(i) in vars_to_nums.values()]
 
-def get_init_state_from_model(m, nums_to_vars):
+def get_init_goal_state_from_model(m, nums_to_vars, plan_horizon):
     '''
     Extract init state from a model of the CNF formula
     '''
@@ -85,15 +85,15 @@ def get_init_state_from_model(m, nums_to_vars):
     for var in m:
         if abs(var) not in nums_to_vars:
             continue
-            
-        if not nums_to_vars[abs(var)].endswith("-0"):
-            continue
-        
-        if var>0:
-            init_state.append(nums_to_vars[var])
-        else:
-            init_state.append(f"(not {nums_to_vars[abs(var)]})")
 
+        var_str = nums_to_vars[abs(var)]
+            
+        if var_str.endswith("-0") or var_str.endswith("-" + str(plan_horizon)):
+            # if first or last step
+            if var > 0:
+                init_state.append(var_str)
+            else:
+                init_state.append(f"(not {var_str})")
     
     return init_state
     
@@ -151,6 +151,38 @@ def generate_formula(task,plan_horizon):
     cnf = CNF(from_string=cnf_str)
 
     return formula, cnf, vars_to_numbers, num_to_vars
+
+
+def get_initial_state_clauses(cnf_formula, num_to_vars):
+    """
+    This function should return the nums of initial state clauses
+    """
+
+    init_state_clause_nums = []
+    for clause in cnf_formula:
+        if len(clause)==1:
+            var = clause[0]
+            if abs(var) in num_to_vars:
+                name = num_to_vars[abs(var)]
+                if name.endswith("-0"):
+                    init_state_clause_nums.append(abs(var))
+
+    return init_state_clause_nums
+
+
+def get_exactly_one_clauses(var_list):
+    '''
+    Makes exactly-one constraint for variables in var_list in CNF
+    Args:
+        List of variables (positive ints)
+    Returns:
+        List of lists representing a set of clauses
+    '''
+    atleast_one = [i for i in var_list]
+    at_most_one = [[-i,-j] for i in var_list for j in var_list if not i==j] #no need for symmetric pairs
+    #(-x1 or -x2) and (-x2 or -x3) and (-x3 or -x4) and (-x2 or -x4)
+    return atleast_one, at_most_one
+
 
 
 if __name__ == "__main__":
@@ -252,7 +284,7 @@ if __name__ == "__main__":
     solver = Glucose3(bootstrap_with=freed_cnf_formula)
     for m in solver.enum_models():
 
-        init_state = get_init_state_from_model(m,nums_to_vars)
+        init_state = get_init_goal_state_from_model(m,nums_to_vars)
         #keep_positives
         init_state = [s for s in init_state if not s.startswith("(not ")]
 

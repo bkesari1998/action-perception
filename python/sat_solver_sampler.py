@@ -1,6 +1,6 @@
 from pysat.formula import CNF
 import tempfile
-import os
+import subprocess
 from typing import List
 
 def parse_result(results_str: List[str]):
@@ -23,8 +23,10 @@ def cmsgen_solve(cnf: CNF, num_samples: int):
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         cnf.to_file(tmpdir + "/cnf.cnf")
-        os.system(
-            f"cd {tmpdir}; cmsgen cnf.cnf --samples {num_samples} --samplefile cnf.out"
+        subprocess.call(
+            ["cmsgen", "cnf.cnf", "--samples", str(num_samples), "--samplefile", "cnf.out"], 
+            cwd=tmpdir,
+            stdout=subprocess.DEVNULL
         )
         with open(tmpdir + "/cnf.out") as f:
             result = f.readlines()

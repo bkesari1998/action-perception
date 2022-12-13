@@ -57,6 +57,10 @@ class Experiment(object):
         self.satsolver = SATSolverModel(domain_file=self.domain_path, problem_file=prob_path, plan_horizon=len(plan))
         print (plan)
 
+        if (len(plan) == 0):
+            print ('No plan needed. Already at Goal.')
+            return True, None, None
+
         last_obs, last_act = None, None
         for i, act in enumerate(plan):
             print(act)
