@@ -114,5 +114,6 @@ class Experiment(object):
 if __name__ == '__main__':
 
     exp_1 = Experiment()
+    done = True
     for i in range(1000):
-        exp_1.run(epi=i, reset=True)
+        done, _, _ = exp_1.run(epi=i, reset=done)
