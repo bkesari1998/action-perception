@@ -15,17 +15,15 @@ Create a new virtual conda environment and install the required packages: <br />
 
 Clone the ppdlgym repository (https://github.com/bkesari1998/pddlgym) and the pddlgym_planners respository (https://github.com/bkesari1998/pddlgym_planners) to your local machine at the same directory level as this repository. <br />
 
-Install the pddlgym repository: <br />
+### Install the pddlgym repository:
 `cd pddlgym` <br />
 `pip install --editable .` <br />
 
-Install minisat: <br />
-Clone the patched minisat repository (https://github.com/agurfinkel/minisat) to your local machine. Switch to the directory: <br />
-`cd minisat`
+### Install cmsgen:
+cmsgen is a SATSolver that can give out solutions to a SAT problem in a 
+nearly uniformly random fashion.
 
-Set the location of installation: <br />
-`export PREFIX=/usr` <br />
-`make config prefix=$PREFIX`<br />
+Clone the patched minisat repository (https://github.com/meelgroup/cmsgen) to your local machine. 
+Follow the installation instruction on their readme page.
 
-Compile and install: <br />
-`make install`
+After compiling cmsgen, make sure to add the cmsgen binary to your system PATH.
