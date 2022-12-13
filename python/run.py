@@ -67,15 +67,18 @@ class Experiment(object):
 
         last_obs, last_act = None, None
         for i, act in enumerate(plan):
-            print("    TimeStep ", i, " Action:", act)
             obs, timestep, done, info = self.environment.step(act)
-            last_obs = copy.deepcopy(obs)
-            last_act = copy.deepcopy(act)
+            # last_obs = copy.deepcopy(obs)
+            # last_act = copy.deepcopy(act)
 
-            self.satsolver.report_action_result(action=last_act.predicate.name, iter=i, success=info['result'])
-            print("       action", "successful" if info['result'] else "failed")
+            self.satsolver.report_action_result(action=act.predicate.name, iter=i, success=info['result'])
+            print("    TimeStep", i, 
+                "location:", info['location'], 
+                "Action:", act, 
+                "successful" if info['result'] else "failed"
+            )
             reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
-            loss, accuracy = self.model.train(x = last_obs, y = reasoned_samples)
+            loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
 
             if not info['result']:
                 # start reasoning now for the loss function
@@ -83,7 +86,6 @@ class Experiment(object):
                 # loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
                 break
                 
-        print()
         return done, loss, accuracy
 
     def load_model():
@@ -114,6 +116,8 @@ class Experiment(object):
 if __name__ == '__main__':
 
     exp_1 = Experiment()
+    success_rate_history = []
     done = True
     for i in range(1000):
         done, _, _ = exp_1.run(epi=i, reset=done)
+        print()

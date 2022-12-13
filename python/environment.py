@@ -48,7 +48,8 @@ class Environment(object):
                 env_name = input("Please input correct environment name: ")
 
         # Variable to track timesteps
-        self.timestep = None 
+        self.timestep = None
+        self.location = None
         self.reset()
         
         
@@ -69,6 +70,17 @@ class Environment(object):
         '''
 
         imageio.imsave(f'{prefix}{str(self.timestep).zfill(3)}.png', img)
+    
+    def get_cache_location(self, obs):
+        """
+        Gets the ground truth location of the agent for debugging purposes
+        """
+        if obs is not None:
+            for lit in obs.literals:
+                if lit.predicate.name == "at" and not lit.predicate.is_negative:
+                    self.location = lit.variables[0].split(":")[0]
+                    return self.location
+        return self.location
 
     def step(self, 
             action):
@@ -79,6 +91,7 @@ class Environment(object):
         # Try executing the actions
         success = None 
         done = False
+        obs = None
         try:
             obs, _, done, _ = self.env.step(action)
             self.timestep += 1
@@ -93,7 +106,12 @@ class Environment(object):
         img = self.render()
         self.save_render(img)
 
-        return self.rendering_to_obs(img), self.timestep, done, {"result": success}
+        info = {
+            "result": success, 
+            "location": self.get_cache_location(obs)
+        }
+
+        return self.rendering_to_obs(img), self.timestep, done, info
     
     def rendering_to_obs(self, rendering):
         '''
@@ -116,4 +134,6 @@ class Environment(object):
         obs, info = self.env.reset()
         # re-arrange order of axis is needed for pytorch
         img = self.render()
+        # store the ground truth location of the agent, for tesing purposes
+        self.get_cache_location(obs)
         return self.rendering_to_obs(img), info

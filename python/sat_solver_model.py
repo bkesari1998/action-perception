@@ -133,7 +133,8 @@ class SATSolverModel:
 
             # Append to list
             init_goal_states.append(ig_state_filtered)
-        print("       Sampled initial states:", "; ".join([state[0].split("(at ")[1].split(")-0")[0] for state in init_goal_states][:20]))
+        # DEBUG INFO
+        # print("       Sampled initial states:", "; ".join([state[0].split("(at ")[1].split(")-0")[0] for state in init_goal_states][:20]))
         return init_goal_states
     
     def get_start_rates(self, num_samples):
