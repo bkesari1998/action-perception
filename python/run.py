@@ -19,7 +19,7 @@ from sat_solver_model import SATSolverModel
 
 default_domain_path = '../pddl/simple.pddl'
 
-MONTE_CARLO_SAMPLES=10
+MONTE_CARLO_SAMPLES=100
 
 
 class Experiment(object):
@@ -31,12 +31,13 @@ class Experiment(object):
         self.model = CNN(num_locations=self.problem_generator.num_locations)
         self.satsolver = None
 
-    def run(self, reset=False):
+    def run(self, epi, reset=False):
         '''
         Runs the experiment.
         returns: nothing.
         '''
         # Get first observation
+        print("Episode ", epi)
 
         obs = None
         
@@ -49,33 +50,40 @@ class Experiment(object):
         # Initialize the model
         prediction = self.model.forward(obs)
         agent_loc, goal_loc = self.get_locations(prediction)
+        goal_loc = "f5-4f"
         # Generate the problem file for planner
         self.problem_generator.generate(agent_loc, goal_loc)
+        print(f"Predicted initial loc: {agent_loc}, goal: {goal_loc}")
         prob_path = '../pddl/simple/generated_problem.pddl'
         plan = self.planner.create_plan(prob_path)
         # Initialize the SAT solver
         self.satsolver = SATSolverModel(domain_file=self.domain_path, problem_file=prob_path, plan_horizon=len(plan))
-        print (plan)
+        print("Generated Plan:", plan)
 
         if (len(plan) == 0):
             print ('No plan needed. Already at Goal.')
+            print()
             return True, None, None
 
         last_obs, last_act = None, None
         for i, act in enumerate(plan):
-            print(act)
+            print("    TimeStep ", i, " Action:", act)
             obs, timestep, done, info = self.environment.step(act)
             last_obs = copy.deepcopy(obs)
             last_act = copy.deepcopy(act)
-            if info['result'] != 'success':
+
+            self.satsolver.report_action_result(action=last_act.predicate.name, iter=i, success=info['result'])
+            print("       action", "successful" if info['result'] else "failed")
+            reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
+            loss, accuracy = self.model.train(x = last_obs, y = reasoned_samples)
+
+            if not info['result']:
                 # start reasoning now for the loss function
-                reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
-                loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
+                # reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
+                # loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
                 break
-        # now also update the model for the last action
-        self.satsolver.report_action_result(action=last_act.predicate.name, iter=i, success=info['result'])
-        reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
-        loss, accuracy = self.model.train(x = last_obs, y = reasoned_samples)
+                
+        print()
         return done, loss, accuracy
 
     def load_model():
@@ -106,4 +114,5 @@ class Experiment(object):
 if __name__ == '__main__':
 
     exp_1 = Experiment()
-    exp_1.run()
+    for i in range(1000):
+        exp_1.run(epi=i, reset=True)

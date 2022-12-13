@@ -80,14 +80,14 @@ class Environment(object):
         success = None 
         done = False
         try:
-            _, _, done, _ = self.env.step(action)
+            obs, _, done, _ = self.env.step(action)
             self.timestep += 1
 
             success = True
 
         # Action fails
         except InvalidAction as e:
-            print(e)
+            # print(e)
             success = False
 
         img = self.render()
