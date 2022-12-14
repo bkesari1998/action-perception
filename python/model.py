@@ -41,6 +41,9 @@ class CNN(nn.Module):
     
     def get_log_probability(self, x):
         return F.log_softmax(x, dim=1)
+    
+    def loss(self, x, y):
+        return self.kl_div(x, y)
         
     def kl_div(self, x, y):
         
@@ -69,7 +72,7 @@ class CNN(nn.Module):
         else:
             return (predicted.argmax(dim=1) == labels.argmax(dim=1)).float().mean()
 
-    def train(self, x, y, lr=0.0001, epoches=10):
+    def train(self, x, y, lr=0.00001, epoches=10):
         # Convert to tensors
         if type(x) != torch.Tensor:
             x = torch.tensor(x, dtype=torch.float32)
