@@ -43,8 +43,8 @@ class CNN(nn.Module):
         return F.log_softmax(x, dim=1)
     
     def loss(self, x, y):
-        return F.cross_entropy(x, y)
-        # return self.kl_div(x, y)
+        # return F.cross_entropy(x, y)
+        return self.kl_div(x, y)
         
     def kl_div(self, x, y):
         
@@ -92,13 +92,20 @@ class CNN(nn.Module):
         optimizer = self.optimizer(lr)
 
         optimizer.zero_grad()
+        prev_loss = None
         for i in range(epoches):
             y_pred = self.forward(x)
             loss = self.loss(y_pred, y)
             loss.backward()
             optimizer.step()
-            if i % 10 == 0 or i == epoches - 1:
-                print(f"      Epoch {i}, Training Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}")
+            if (i + 1) % 10 == 0 or i == epoches - 1:
+                print(f"      Epoch {i+1}, Training Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}, cross_entropy: {F.cross_entropy(y_pred, y)}")
+            
+            # early stopping
+            if prev_loss is not None and abs(prev_loss - loss) < 0.0001:
+                print("        Early Stoping.")
+                break
+            prev_loss = loss
         return loss, self.accuracy(y_pred, y)
     
     def save(self, path):
