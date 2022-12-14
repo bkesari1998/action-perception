@@ -7,6 +7,7 @@ import pddlgym
 from gym import error
 from pddlgym.core import InvalidAction
 import imageio
+from torchvision.transforms.functional import to_tensor
 
 import matplotlib; matplotlib.use('agg')
 
@@ -125,7 +126,7 @@ class Environment(object):
         rendering: image array of rendered environment.
         returns: observation array.
         '''
-        return rendering.transpose(2, 0, 1)[:3]
+        return to_tensor(rendering[:, :, :3])
 
 
     def reset(self, problem_index=None):

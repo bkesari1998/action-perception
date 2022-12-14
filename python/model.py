@@ -56,13 +56,8 @@ class CNN(nn.Module):
             return (predicted.argmax(dim=1) == labels).float().mean()
         else:
             return (predicted.argmax(dim=1) == labels.argmax(dim=1)).float().mean()
-    
-    def predict(self, x):
 
-        # Define the predict function
-        return x.argmax(dim=1)
-
-    def train(self, x, y, lr=0.0005, epoches=1):
+    def train(self, x, y, lr=0.0001, epoches=10):
         # Convert to tensors
         if type(x) != torch.Tensor:
             x = torch.tensor(x, dtype=torch.float32)
@@ -78,7 +73,7 @@ class CNN(nn.Module):
             loss = self.loss(y_pred, y)
             loss.backward()
             optimizer.step()
-        print(f"Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}")
+        print(f"Training Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}")
         return loss, self.accuracy(y_pred, y)
     
     def save(self, path):

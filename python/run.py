@@ -21,7 +21,7 @@ from model_evaluate import evaluate_model
 
 default_domain_path = '../pddl/simple.pddl'
 
-MONTE_CARLO_SAMPLES=1000
+MONTE_CARLO_SAMPLES=100
 
 
 class Experiment(object):
@@ -52,6 +52,7 @@ class Experiment(object):
         
         # Initialize the model
         prediction = self.model.forward(obs)
+        print("prediction:", prediction.detach().numpy())
 
         ### here, we manually set the goal location
         # location 9 (f5-4f) is the goal location, so exclude it
@@ -73,11 +74,8 @@ class Experiment(object):
             print()
             return True, None, None
 
-        last_obs, last_act = None, None
         for i, act in enumerate(plan):
             obs, timestep, done, info = self.environment.step(act)
-            # last_obs = copy.deepcopy(obs)
-            # last_act = copy.deepcopy(act)
 
             self.satsolver.report_action_result(action=act.predicate.name, iter=i, success=info['result'])
             print("    TimeStep", i, 
@@ -95,7 +93,7 @@ class Experiment(object):
             elif done:
                 break
         reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
-        print(reasoned_samples)
+        print("SAT Solver reasoned:", reasoned_samples[0])
         loss, accuracy = self.model.train(x = init_obs, y = reasoned_samples)
 
         return done, loss, accuracy
