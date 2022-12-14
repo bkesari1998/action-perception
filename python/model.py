@@ -43,7 +43,8 @@ class CNN(nn.Module):
         return F.log_softmax(x, dim=1)
     
     def loss(self, x, y):
-        return self.kl_div(x, y)
+        return F.cross_entropy(x, y)
+        # return self.kl_div(x, y)
         
     def kl_div(self, x, y):
         
@@ -57,7 +58,7 @@ class CNN(nn.Module):
         # print()
         # print(y.detach().numpy().squeeze())
 
-        loss = F.kl_div(x, y, reduction='batchmean', log_target=True)
+        loss = F.kl_div(x, y, reduction='batchmean', log_target=False)
         # print(loss)
         return loss
 
@@ -80,7 +81,7 @@ class CNN(nn.Module):
         else:
             return (predicted.argmax(dim=1) == labels.argmax(dim=1)).float().mean()
 
-    def train(self, x, y, lr=0.00001, epoches=10):
+    def train(self, x, y, lr=0.0001, epoches=150):
         # Convert to tensors
         if type(x) != torch.Tensor:
             x = torch.tensor(x, dtype=torch.float32)
@@ -96,7 +97,8 @@ class CNN(nn.Module):
             loss = self.loss(y_pred, y)
             loss.backward()
             optimizer.step()
-        print(f"Training Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}")
+            if i % 10 == 0 or i == epoches - 1:
+                print(f"      Epoch {i}, Training Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}")
         return loss, self.accuracy(y_pred, y)
     
     def save(self, path):

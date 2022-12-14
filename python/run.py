@@ -4,6 +4,7 @@ import sys
 import os
 import copy
 import numpy as np
+import torch
 
 # Path to pddlgym
 sys.path.append('../../pddlgym')
@@ -21,17 +22,22 @@ from model_evaluate import evaluate_model
 
 default_domain_path = '../pddl/simple.pddl'
 
-MONTE_CARLO_SAMPLES=100
 
 
 class Experiment(object):
-    def __init__(self, domain_path=default_domain_path):
+    def __init__(self, domain_path=default_domain_path, batch_size=16, sat_mc_samples=10):
         self.environment = Environment()
         self.problem_generator = ProblemGenSimple()
         self.planner = Planner(domain_path=domain_path)
         self.domain_path = domain_path
         self.model = CNN(num_locations=self.problem_generator.num_locations)
         self.satsolver = None
+        self.sat_mc_samples = sat_mc_samples
+
+        # batched training
+        self.obs_history = []
+        self.sat_label_history = []
+        self.batch_size = batch_size
 
     def run(self, epi, reset=False):
         '''
@@ -92,20 +98,30 @@ class Experiment(object):
                 break
             elif done:
                 break
-        reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
+        reasoned_samples = self.satsolver.get_start_rates(num_samples=self.sat_mc_samples)
         print("SAT Solver reasoned:", reasoned_samples[0])
-        loss, accuracy = self.model.train(x = init_obs, y = reasoned_samples)
+        loss, accuracy = self.train_model(x = init_obs, y = reasoned_samples)
 
         return done, loss, accuracy
 
     def load_model():
         pass
 
-    def train_model(self, num_eps):
-        reset = True
-        for episode in range(num_eps):
-            reset, loss, accuracy = self.run(reset)
-            print('Episode: ', episode, ' done: ', reset, 'loss: ', loss, 'accuracy: ', accuracy)
+    def train_model(self, x, y):
+        self.obs_history.append(x)
+        self.sat_label_history.append(y)
+        if len(self.obs_history) < self.batch_size:
+            return None, None
+
+        print(">>>>> Training model...")
+
+        loss, accuracy = self.model.train(
+            x=torch.stack(self.obs_history), 
+            y=np.concatenate(self.sat_label_history, axis=0)
+        )
+        self.obs_history = []
+        self.sat_label_history = []
+        return loss, accuracy
 
 
     def get_locations(self, prediction, exclude_agent_loc=[]):
