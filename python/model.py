@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-
 class CNN(nn.Module):
     def __init__(self, num_locations):
         super(CNN, self).__init__()
@@ -27,8 +26,7 @@ class CNN(nn.Module):
             nn.LazyLinear(num_locations),
         )
 
-        self.softmax = nn.Softmax(dim=1)
-        self.log_softmax = nn.LogSoftmax(dim=1)
+        kl_loss = nn.KLDivLoss(reduction="batchmean")
 
     def forward(self, x):
         if type(x) != torch.Tensor:
@@ -39,25 +37,18 @@ class CNN(nn.Module):
         return self.model.forward(x)
 
     def get_probability(self, x):
-        return self.softmax(x)
+        return F.softmax(x, dim=1)
     
     def get_log_probability(self, x):
-        return self.log_softmax(x)
+        return F.log_softmax(x, dim=1)
         
     def kl_div(self, x, y):
-        # Take the log of y
-        y = torch.log(y)
+        
+        # Calculate softmax of x
+        x = F.log_softmax(x, dim=1)
 
-        print()
-        print()
-        print(self.get_log_probability(x).detach().numpy().squeeze())
-        print()
-        print()
-        print(y.detach().numpy().squeeze())
-
-        loss = F.kl_div(x, y, reduction='batchmean', log_target=True)
-        print(loss)
-        return loss
+        # Caclulate kl divergence
+        return self.kl_loss(x, y)
 
     def cross_entropy(self, x, y):
 
