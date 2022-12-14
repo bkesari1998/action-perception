@@ -98,7 +98,8 @@ def num_successful_actions(predicted, actual):
             return 1 / 2
         else:
             return 0
-
+    elif predicted == 9:
+        return 0
         
 
 def evaluate_model(model, dataloader=dataloader):
@@ -116,6 +117,7 @@ def evaluate_model(model, dataloader=dataloader):
 
             # Calcuate the success rate of the plan
             y_np = y.detach().numpy()
+            print(y_np.shape)
             success_rate = np.array([num_successful_actions(predicted_action[i], y_np[i]) for i in range(len(y_np))])
             mean_success_rate = np.mean(success_rate)
             print("Evaluation success rate:", mean_success_rate)

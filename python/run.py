@@ -97,8 +97,8 @@ class Experiment(object):
                 # reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
                 # loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
                 break
-            elif done:
-                break
+            # elif done:
+            #     break
         reasoned_samples = self.satsolver.get_start_rates(num_samples=self.sat_mc_samples)
         print("SAT Solver reasoned:", reasoned_samples[0])
         loss, accuracy = self.train_model(x = init_obs, y = reasoned_samples)
@@ -154,9 +154,18 @@ if __name__ == '__main__':
     success_rate_history = []
     done = True
     for i in range(1000):
-        done, _, _ = exp_1.run(epi=i, reset=True)
+        done, kl_loss, train_acc = exp_1.run(epi=i, reset=True)
         if done:
             print("Done!")
-        acc, cross_entropy = evaluate_model(exp_1.model)
-        print("Evaluation On pre-generated dataset: Accuracy:", acc.numpy(), "  Cross Entropy:", cross_entropy.numpy())
+        test_acc, cross_entropy, mean_success_rate = evaluate_model(exp_1.model)
+        print("Evaluation On pre-generated dataset: Accuracy:", test_acc.numpy(), "  Cross Entropy:", cross_entropy.numpy())
+
+        if kl_loss is not None:
+            # Save the model
+            torch.save(exp_1.model.state_dict(), "model.pt")
+
+            # Save the evaluation results to csv
+            with open('results.csv', 'a') as f:
+                f.write(f"{i},{kl_loss},{train_acc},{test_acc.numpy()},{cross_entropy.numpy()},{mean_success_rate}\n")
+
         print()
