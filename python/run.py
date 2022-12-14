@@ -58,7 +58,8 @@ class Experiment(object):
         
         # Initialize the model
         prediction = self.model.forward(obs)
-        print("prediction:", prediction.detach().numpy())
+        prediction_probs = torch.softmax(prediction, dim=1)
+        print("prediction:", prediction_probs.detach().numpy())
 
         ### here, we manually set the goal location
         # location 9 (f5-4f) is the goal location, so exclude it
