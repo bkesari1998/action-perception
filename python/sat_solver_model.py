@@ -97,6 +97,9 @@ class SATSolverModel:
         #add step number of failure
         possible_preconditions = [p + f"-{iter}" for p in possible_preconditions]
         possible_postconditions = [p + f"-{iter + 1}" for p in possible_postconditions]
+        
+        # print(possible_postconditions)
+        # print(possible_preconditions)
 
         #translate to numbers and **negate** them
         if success:

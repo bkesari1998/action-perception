@@ -55,6 +55,7 @@ class Experiment(object):
         ### here, we manually set the goal location
         # location 9 (f5-4f) is the goal location, so exclude it
         agent_loc, goal_loc = self.get_locations(prediction, exclude_agent_loc=[9])
+        # agent_loc = "f2-2f"
         goal_loc = "f5-4f"
 
         # Generate the problem file for planner
