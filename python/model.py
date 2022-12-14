@@ -50,8 +50,16 @@ class CNN(nn.Module):
         # Calculate softmax of x
         x = F.log_softmax(x, dim=1)
 
-        # Caclulate kl divergence
-        return self.kl_loss(x, y)
+        # print()
+        # print()
+        # print(self.get_log_probability(x).detach().numpy().squeeze())
+        # print()
+        # print()
+        # print(y.detach().numpy().squeeze())
+
+        loss = F.kl_div(x, y, reduction='batchmean', log_target=True)
+        # print(loss)
+        return loss
 
     def cross_entropy(self, x, y):
 
