@@ -31,17 +31,6 @@ class Environment(object):
             try:
                 # Create environmet
                 self.env = pddlgym.make(env_name, raise_error_on_invalid_action=True)
-                self.env.fix_problem_index(3)
-
-                # # Fix problem index
-                # problem_index_fixed = False
-                # while not problem_index_fixed:
-                #     try:
-                #         self.env.fix_problem_index(problem_index)
-                #         problem_index_fixed = True
-                #     except: # add exception
-                #         # Ask user to input existing problem index
-                #         problem_index = input("Please input existing problem index")
 
             except error.NameNotFound as e:
                 print(e)
@@ -103,7 +92,7 @@ class Environment(object):
 
         # Action fails
         except InvalidAction as e:
-            # print(e)
+
             success = False
 
         img = self.render()

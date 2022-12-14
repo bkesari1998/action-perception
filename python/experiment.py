@@ -88,13 +88,15 @@ class Experiment(object):
                 break
 
         reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
-        print("Reasoned Samples: ", reasoned_samples)
+        print("Reasoned Samples: ", reasoned_samples.squeeze())
 
         # Get probabilities of predicted locations
         model_probs = self.model.get_probability(prediction)
-        print("Model Probabilities: ", model_probs)
+        print("Model Probabilities: ", model_probs.detach().numpy().squeeze())
 
-        loss = self.model.train(x = obs, y = reasoned_samples)
+        # Train over the samples for 100 iterations
+        for i in range(100):
+            loss = self.model.train(x = obs, y = reasoned_samples)
 
         return done, loss
 
@@ -129,7 +131,7 @@ if __name__ == '__main__':
 
     exp_1 = Experiment()
     loss_history = []
-    for i in range(100):
+    for i in range(1000):
         done, loss = exp_1.run(i)
         loss_history.append(loss.detach().numpy())
 
@@ -142,5 +144,9 @@ if __name__ == '__main__':
             print("Saving loss history...")
             np.save('loss_history.npy', np.array(loss_history))
         
-        if i % 10 == 0:
+        if i % 1 == 0:
             print("Training Loss: ", loss.detach().numpy())
+        
+        print()
+        print()
+        
