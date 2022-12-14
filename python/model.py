@@ -25,10 +25,10 @@ class CNN(nn.Module):
             # fully connected layer
             nn.LazyLinear(64),
             nn.LazyLinear(num_locations),
-
-            # softmax
-            # nn.Softmax(dim=1)
         )
+
+        self.softmax = nn.Softmax(dim=1)
+        self.log_softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         if type(x) != torch.Tensor:
@@ -38,7 +38,28 @@ class CNN(nn.Module):
             x = x.unsqueeze(0)
         return self.model.forward(x)
 
-    def loss(self, x, y):
+    def get_probability(self, x):
+        return self.softmax(x)
+    
+    def get_log_probability(self, x):
+        return self.log_softmax(x)
+        
+    def kl_div(self, x, y):
+        # Take the log of y
+        y = torch.log(y)
+
+        print()
+        print()
+        print(self.get_log_probability(x).detach().numpy().squeeze())
+        print()
+        print()
+        print(y.detach().numpy().squeeze())
+
+        loss = F.kl_div(x, y, reduction='batchmean', log_target=True)
+        print(loss)
+        return loss
+
+    def cross_entropy(self, x, y):
 
         # Define the loss function
         return F.cross_entropy(x, y)
