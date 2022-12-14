@@ -9,7 +9,7 @@ dataset = ImageFolder(root=os.path.dirname(__file__) + \
                         os.path.sep + ".." + os.path.sep + "evaluation",
         transform=transforms.Compose([transforms.ToTensor()])
 )
-dataloader = DataLoader(dataset, batch_size=10, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=10)
 
 
 def evaluate_model(model, dataloader=dataloader):
@@ -21,6 +21,7 @@ def evaluate_model(model, dataloader=dataloader):
         running_loss = 0
         for x, y in dataloader:
             predicted = model.forward(x)[:, :10]
+            print("Evaluation predicted:", predicted.argmax(dim=1).numpy())
             running_accuracy += model.accuracy(predicted, y)
             running_loss += F.cross_entropy(predicted, y)
         return running_accuracy / len(dataloader), running_loss / len(dataloader)

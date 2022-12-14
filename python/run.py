@@ -48,6 +48,7 @@ class Experiment(object):
             self.environment.timestep = 0
         else:
             obs, _ = self.environment.reset()
+        init_obs = copy.deepcopy(obs)
         
         # Initialize the model
         prediction = self.model.forward(obs)
@@ -55,7 +56,7 @@ class Experiment(object):
         ### here, we manually set the goal location
         # location 9 (f5-4f) is the goal location, so exclude it
         agent_loc, goal_loc = self.get_locations(prediction, exclude_agent_loc=[9])
-        agent_loc = "f0-2f"
+        # agent_loc = "f0-2f"
         goal_loc = "f5-4f"
 
         # Generate the problem file for planner
@@ -95,7 +96,7 @@ class Experiment(object):
                 break
         reasoned_samples = self.satsolver.get_start_rates(num_samples=MONTE_CARLO_SAMPLES)
         print(reasoned_samples)
-        loss, accuracy = self.model.train(x = obs, y = reasoned_samples)
+        loss, accuracy = self.model.train(x = init_obs, y = reasoned_samples)
 
         return done, loss, accuracy
 
