@@ -48,17 +48,12 @@ class CNN(nn.Module):
         
     def kl_div(self, x, y):
         
+        kl_loss = nn.KLDivLoss(reduction="batchmean")
+
         # Calculate softmax of x
         x = F.log_softmax(x, dim=1)
 
-        # print()
-        # print()
-        # print(self.get_log_probability(x).detach().numpy().squeeze())
-        # print()
-        # print()
-        # print(y.detach().numpy().squeeze())
-
-        loss = F.kl_div(x, y, reduction='batchmean', log_target=False)
+        loss = kl_loss(x, y)
         # print(loss)
         return loss
 
@@ -81,7 +76,7 @@ class CNN(nn.Module):
         else:
             return (predicted.argmax(dim=1) == labels.argmax(dim=1)).float().mean()
 
-    def train(self, x, y, lr=0.0001, epoches=150):
+    def train(self, x, y, lr=0.001, epoches=150):
         # Convert to tensors
         if type(x) != torch.Tensor:
             x = torch.tensor(x, dtype=torch.float32)
@@ -99,7 +94,7 @@ class CNN(nn.Module):
             loss.backward()
             optimizer.step()
             if (i + 1) % 10 == 0 or i == epoches - 1:
-                print(f"      Epoch {i+1}, Training Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}, cross_entropy: {F.cross_entropy(y_pred, y)}")
+                print(f"      Epoch {i+1}, Training Loss: {loss}, Accuracy: {self.accuracy(y_pred, y)}, Cross Entropy: {F.cross_entropy(y_pred, y)}")
             
             # early stopping
             if prev_loss is not None and abs(prev_loss - loss) < 0.0001:
