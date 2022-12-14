@@ -31,7 +31,7 @@ class Environment(object):
             try:
                 # Create environmet
                 self.env = pddlgym.make(env_name, raise_error_on_invalid_action=True)
-                # self.env.fix_problem_index(4)
+                self.env.fix_problem_index(3)
 
                 # # Fix problem index
                 # problem_index_fixed = False

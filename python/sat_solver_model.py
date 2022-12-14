@@ -97,9 +97,10 @@ class SATSolverModel:
         #add step number of failure
         possible_preconditions = [p + f"-{iter}" for p in possible_preconditions]
         possible_postconditions = [p + f"-{iter + 1}" for p in possible_postconditions]
+
         
-        # print(possible_postconditions)
-        # print(possible_preconditions)
+        print(possible_postconditions)
+        print(possible_preconditions)
 
         #translate to numbers and **negate** them
         if success:
@@ -107,13 +108,18 @@ class SATSolverModel:
             possible_precondition_nums = [self.vars_to_num[p] for p in possible_preconditions]
             # possible_postcondition_nums = []
             possible_postcondition_nums = [self.vars_to_num[p] for p in possible_postconditions]
+            self.freed_cnf.append(possible_precondition_nums)
         else:
-            # if failed, one of it should be false
+            # if failed, all of it should be false
             possible_precondition_nums = [-self.vars_to_num[p] for p in possible_preconditions]
+            # possible_postcondition_nums = [-self.vars_to_num[p] for p in possible_postconditions]
             possible_postcondition_nums = []
+            for element in possible_precondition_nums:
+                self.freed_cnf.append([element])
+            # for element in possible_postcondition_nums:
+            #     self.freed_cnf.append([element])
 
         # append it to the existing formula
-        self.freed_cnf.append(possible_precondition_nums)
         if len(possible_postcondition_nums) > 0:
             self.freed_cnf.append(possible_postcondition_nums)
 
@@ -166,7 +172,14 @@ class SATSolverModel:
                     state_var_2 = "-".join(new_name)
                     goal_counts[self.loc_dict[state_var_2]] += 1
         
-        start_counts /= len(init_states)
+        # Get number of possible starting locations
+        num_possible = np.sum(start_counts > 0)
+
+        # Give locations that are possible a value of 1
+        start_counts[start_counts > 0] = 1
+
+        # Give equal probability to each possible location
+        start_counts /= num_possible
         goal_counts /= len(init_states)
 
         # Return rate of each location

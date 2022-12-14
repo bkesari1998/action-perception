@@ -9,7 +9,7 @@ dataset = ImageFolder(root=os.path.dirname(__file__) + \
                         os.path.sep + ".." + os.path.sep + "evaluation",
         transform=transforms.Compose([transforms.ToTensor()])
 )
-dataloader = DataLoader(dataset)
+dataloader = DataLoader(dataset, batch_size=10, shuffle=True)
 
 
 def evaluate_model(model, dataloader=dataloader):
