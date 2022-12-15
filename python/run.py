@@ -30,7 +30,7 @@ class Experiment(object):
         self.problem_generator = ProblemGenSimple()
         self.planner = Planner(domain_path=domain_path)
         self.domain_path = domain_path
-        self.model = CNN(num_locations=self.problem_generator.num_locations)
+        self.model = CNN(num_locations=9)
         self.satsolver = None
         self.sat_mc_samples = sat_mc_samples
 

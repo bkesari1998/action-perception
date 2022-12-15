@@ -98,8 +98,6 @@ def num_successful_actions(predicted, actual):
             return 1 / 2
         else:
             return 0
-    elif predicted == 9:
-        return 0
         
 
 def evaluate_model(model, dataloader=dataloader):

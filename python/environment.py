@@ -97,8 +97,8 @@ class Environment(object):
 
             success = False
 
-        img = self.render()
-        self.save_render(img)
+        # img = self.render()
+        # self.save_render(img)
 
         info = {
             "result": success, 
