@@ -30,7 +30,7 @@ class Experiment(object):
         self.problem_generator = ProblemGenSimple()
         self.planner = Planner(domain_path=domain_path)
         self.domain_path = domain_path
-        self.model = CNN(num_locations=9)
+        self.model = CNN(num_locations=self.problem_generator.num_locations)
         self.satsolver = None
         self.sat_mc_samples = sat_mc_samples
 
@@ -82,7 +82,7 @@ class Experiment(object):
             return True, None, None
 
         for i, act in enumerate(plan):
-            obs, timestep, done, info = self.environment.step(act)
+            timestep, done, info = self.environment.step(act)
 
             self.satsolver.report_action_result(action=act.predicate.name, iter=i, success=info['result'])
             print("    TimeStep", i, 

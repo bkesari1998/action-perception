@@ -108,7 +108,7 @@ class Environment(object):
             }
         }
 
-        return self.rendering_to_obs(img), self.timestep, done, info
+        return self.timestep, done, info
     
     def rendering_to_obs(self, rendering):
         '''

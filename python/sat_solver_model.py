@@ -39,6 +39,7 @@ class SATSolverModel:
             "(at f4-2f)-0": 6,
             "(at f5-2f)-0": 7,
             "(at f5-3f)-0": 8,
+            "(at f5-4f)-0": 9,
         }
         # TODO add goals
 
@@ -171,7 +172,6 @@ class SATSolverModel:
                     goal_counts[self.loc_dict[state_var_2]] += 1
         
         # Get number of possible starting locations
-        start_counts = start_counts[:len(start_counts) - 1]
         num_possible = np.sum(start_counts > 0)
 
         # Give locations that are possible a value of 1

@@ -76,7 +76,7 @@ class CNN(nn.Module):
         else:
             return (predicted.argmax(dim=1) == labels.argmax(dim=1)).float().mean()
 
-    def train(self, x, y, lr=0.001, epoches=150):
+    def train(self, x, y, lr=0.0005, epoches=150):
         # Convert to tensors
         if type(x) != torch.Tensor:
             x = torch.tensor(x, dtype=torch.float32)
